@@ -1,0 +1,114 @@
+﻿@model EnglishLearningPlatform.Models.Word
+
+@{
+    ViewData["Title"] = "Удаление слова";
+    ViewData["CurrentPage"] = "words";
+}
+
+<!-- Хлебные крошки -->
+<div class="breadcrumb mb-4">
+    <a asp-action="Index" class="text-violet">Словарь</a>
+    <span class="mx-2">/</span>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="text-violet">@Model.EnglishWord</a>
+    <span class="mx-2">/</span>
+    <span class="text-muted">Удаление</span>
+</div>
+
+<!-- Заголовок -->
+<div class="delete-word-header text-center">
+    <h1 class="delete-word-title">Удаление слова</h1>
+    <p class="delete-word-subtitle">Вы уверены, что хотите удалить это слово?</p>
+</div>
+
+<div class="delete-word-container">
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Подтверждение удаления
+            </h4>
+        </div>
+        <div class="card-body">
+            <!-- Информация о слове -->
+            <div class="row">
+                <!-- Изображение -->
+                <div class="col-md-4 text-center mb-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl)) {
+                        <img src="@Model.ImageUrl" class="delete-word-image" alt="@Model.EnglishWord"
+                             onerror="this.src='https://placehold.co/300x200/726ae3/white?text=Image+Not+Found'">
+                    }
+                    else {
+                        <img src="https://placehold.co/300x200/726ae3/white?text=Image+Not+Found"
+                             class="delete-word-image" alt="@Model.EnglishWord">
+                    }
+                </div>
+
+                <!-- Информация -->
+                <div class="col-md-8">
+                    <h3 class="text-danger mb-3">@Model.EnglishWord</h3>
+
+                    <div class="word-details">
+                        @if (!string.IsNullOrEmpty(Model.Translation)) {
+                            <div class="detail-item mb-2">
+                                <strong>Перевод:</strong>
+                                <span class="ms-2">@Model.Translation</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Transcription)) {
+                            <div class="detail-item mb-2">
+                                <strong>Транскрипция:</strong>
+                                <span class="ms-2">[@Model.Transcription]</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.PartOfSpeech)) {
+                            <div class="detail-item mb-2">
+                                <strong>Часть речи:</strong>
+                                <span class="ms-2">@Model.PartOfSpeech</span>
+                            </div>
+                        }
+
+                        <div class="detail-item mb-2">
+                            <strong>Статус:</strong>
+                            <span class="ms-2 badge @(Model.IsLearned ? "bg-success" : "bg-warning")">
+                                @(Model.IsLearned ? "Изучено" : "Не изучено")
+                            </span>
+                        </div>
+
+                        <div class="detail-item mb-2">
+                            <strong>Добавлено:</strong>
+                            <span class="ms-2">@Model.CreatedDate.ToString("dd.MM.yyyy")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Предупреждение -->
+            <div class="alert alert-warning mt-4">
+                <h5 class="alert-heading">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                    Внимание!
+                </h5>
+                <p class="mb-0">
+                    Это действие нельзя отменить. Слово будет полностью удалено из вашего словаря.
+                </p>
+            </div>
+
+            <!-- Форма удаления -->
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="d-flex gap-3 justify-content-center mt-4">
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="bi bi-trash-fill me-2"></i>Да, удалить
+                    </button>
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

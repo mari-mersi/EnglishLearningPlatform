@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "DigiMedia SEO Template";
+    Layout = "_Layout";
+    @*ViewData["CssVersion"] = "v1";*@
+}
+
+<div class="intro-banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <img src="~/images/logo-v1.png" alt="">
+                <h1>DigiMedia HTML5 Template</h1>
+                <h4>Please choose one of the three variations below.</h4>
+                <div class="first-button scroll-to-section">
+                    <a asp-controller="Home" asp-action="Homepage1">Choose Demo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="demos" id="demos">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="demo-item">
+                    <a asp-controller="Home" asp-action="Homepage1">
+                        <img src="~/images/demo-1.jpg" alt="DigiMedia - variation 1">
+                    </a>
+                    <h4>Version 1</h4>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="demo-item">
+                    <a asp-controller="Home" asp-action="Homepage2">
+                        <img src="~/images/demo-2.jpg" alt="DigiMedia - variation 2">
+                    </a>
+                    <h4>Version 2</h4>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="demo-item">
+                    <a asp-controller="Home" asp-action="Homepage3">
+                        <img src="~/images/demo-3.jpg" alt="DigiMedia - variation 3">
+                    </a>
+                    <h4>Version 3</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

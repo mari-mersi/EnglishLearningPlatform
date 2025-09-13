@@ -1,0 +1,74 @@
+﻿<footer>
+    <div class="pre-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-sm-8 col-7">
+                    <ul class="info">
+                        <li>
+                            <a href="mailto:mpleskan2002@gmail.com" target="_blank" aria-label="Написать email" title="Написать письмо">
+                                <i class="fa fa-envelope" aria-hidden="true"></i>mpleskan2002@gmail.com
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tel:+79149196570" aria-label="Позвонить по номеру" title="Позвонить">
+                                <i class="fa fa-phone" aria-hidden="true"></i>
+                                +7 914 919-65-70
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-sm-4 col-5">
+                    <ul class="social-media">
+                        @* !Добавить ссылки *@
+                        <li><a href="https://vk.com/marimersi" target="_blank"><i class="fa fa-vk"></i></a></li>
+                        <li><a href="https://t.me/mari_mersi" target="_blank"><i class="fa fa-telegram"></i></a></li>
+                        <li><a href="https://wa.me/79149196570" target="_blank"><i class="fa fa-whatsapp"></i></a></li>
+                        @*!Свой сайт*@
+                        @**<li><a href="#"><i class="fa fa-globe"></i></a></li>@**@
+                        <li><a href="https://github.com/mari-mersi" target="_blank"><i class="fa fa-github"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <p>
+                    @* Может стоит поменять на фулстек-разработчик?*@
+                    © 2025 Мария Плескань - Fullstack веб-разработчик |
+                    @* Пока-что тут гитхаб, планируется ссылка на сайт*@
+                    <a href="https://github.com/mari-mersi" target="_blank">Портфолио</a><br>
+                    <small>
+                        Изображения: <a href="https://www.freepik.com" target="_blank" rel="nofollow">Freepik</a> |
+                        Дизайн: адаптация шаблона <a href="https://templatemo.com/tm-568-digimedia" rel="nofollow">TemplateMo</a>
+                    </small><br>
+                    <a asp-controller="Home" asp-action="Privacy">Политика конфиденциальности</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Кнопка "Наверх" -->
+    <div class="scroll-to-top">
+        <a href="#top" aria-label="Наверх" title="Вернуться к началу">
+            <i class="fa fa-chevron-up"></i>
+        </a>
+    </div>
+</footer>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const footer = document.querySelector('footer');
+        if (footer) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        footer.classList.add('visible');
+                        observer.unobserve(footer);
+                    }
+                });
+            }, { threshold: 0.1 }); // Срабатывает при 10% видимости
+
+            observer.observe(footer);
+        }
+    });
+</script>

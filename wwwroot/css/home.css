@@ -1,0 +1,328 @@
+﻿/*=============================================================
+    Главная (Home) - Баннер и основные компоненты
+===============================================================
+***************************************************************
+Содержание:
+  1. Вводная секция
+    1.1 Цветные текстовые элементы
+  2. Карточки действий
+    2.1 Контейнер карточек
+    2.2 Отдельная карточка
+    2.3 Кнопки карточек
+    2.4 Иконки карточек 
+  3. Статистика
+  4. Утилиты
+    4.1 Вспомогательные классы
+    4.2 Анимации
+      4.2.1 Ховер-эффекты и активное состояние
+      4.2.2 Фокус-состояния и доступность  
+  5. Адаптивность
+    5.1 Респонсивная сетка карточек
+    5.1 Медиа-запросы
+**************************************************************/
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║               1. ВВОДНАЯ СЕКЦИЯ                         ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ═══════════ 1.1. Цветные текстовые элементы ═════════════ */
+.text-pink {
+    color: var(--color-pink-500) !important;
+    margin-right: -7px;
+}
+.text-violet {
+    color: var(--color-violet-500) !important;
+    margin-right: -7px;
+}
+.text-orange {
+    color: var(--color-orange-500) !important;
+    margin-right: -7px;
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║               2. КАРТОЧКИ ДЕЙСТВИЙ                      ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ═══════════ 2.1. Контейнер карточек ═════════════════════ */
+.action-cards-container {
+    padding: 60px 0;
+    position: relative;
+    z-index: var(--z-index-cards);
+}
+.demos {
+    padding-top: 60px;
+}
+/* ═══════════ 2.2. Отдельная карточка ═════════════════════ */
+.action-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+    border: 1px solid var(--color-gray-300);
+    border-radius: 23px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 30px;
+    position: relative;
+}
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
+    }
+    .action-card .thumb {
+        text-align: center;
+        padding: 30px 20px 20px 20px;
+        border-radius: 15px 15px 0 0;
+    }
+    .action-card .right-content {
+        padding: 15px 20px 25px 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+    .action-card .right-content a {
+        display: inline-block;
+        padding: 8px 12px;
+        background-color: var(--color-orange-500);
+        color: var(--color-button-primary-text);
+        font-size: 15px;
+        border-radius: 18px;
+    }
+    .action-card h4 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--color-gray-800);
+        margin-bottom: 12px;
+        text-align: center;
+    }
+    .action-card p {
+        flex-grow: 1;
+        margin-bottom: 15px;
+        color: var(--color-gray-500);
+        line-height: 1.5;
+    }
+.demo-item {
+    position: relative;
+}
+.demos img {
+    transition: all .5s;
+    border-radius: 23px;
+}
+.demos h4 {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 30px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+/* ═══════════ 2.3. Кнопки карточек ════════════════════════ */
+.action-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--color-orange-500);
+    color: white !important;
+    border-radius: 20px;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+/* ═══════════ 2.4. Иконки карточек ════════════════════════ */
+.action-card .thumb img {
+    max-height: 150px;
+    width: auto;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║               3. СТАТИСТИКА                             ║
+  ╚═════════════════════════════════════════════════════════╝*/
+.achievement-item {
+    padding: 20px;
+    border-radius: 15px;
+    background-color: #f8f9fa;
+    transition: transform 0.3s;
+}
+    .achievement-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+    }
+.badge-success {
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+}
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+}
+.chart-container {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+}
+/* Календарь активности */
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin: 0 auto;
+    max-width: 600px;
+}
+.weekday {
+    text-align: center;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    padding: 5px 0;
+}
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin: 0 auto;
+    max-width: 600px;
+}
+.calendar-day {
+    aspect-ratio: 1;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+    .calendar-day.empty {
+        background-color: transparent;
+        border: 1px dashed #e0e0e0;
+        cursor: default;
+    }
+    .calendar-day.active {
+        background-color: #726ae3;
+        color: white;
+        font-weight: 600;
+    }
+    .calendar-day.sunday {
+        background-color: #ffe6e6;
+    }
+        .calendar-day.sunday.active {
+            background-color: #ff9999;
+        }
+    .calendar-day:hover:not(.empty) {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+.calendar-legend {
+    font-size: 12px;
+}
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+    .legend-color.empty {
+        background-color: transparent;
+        border: 1px dashed #e0e0e0;
+    }
+    .legend-color.inactive {
+        background-color: #f0f0f0;
+    }
+    .legend-color.active {
+        background-color: #726ae3;
+    }
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║               4. УТИЛИТЫ                                ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ═══════════ 4.1. Вспомогательные классы ═════════════════ */
+/* ═══════════ 4.2. Анимации ═══════════════════════════════ */
+/* ─────────────── 4.2.1 Ховер-эффекты и активное состояние  */
+.demos img:hover {
+    opacity: 1;
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.25);
+}
+.action-button:hover {
+    background-color: var(--color-pink-700);
+    transform: translateY(-2px);
+}
+/* ─────────────── 4.2.2 Фокус-состояния и доступность ───── */
+.action-button:focus {
+    outline: 2px solid var(--color-pink-500);
+    outline-offset: 2px;
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║               5. АДАПТИВНОСТЬ                           ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ═══════════ 5.1. Респонсивная сетка карточек ════════════ */
+/* ═══════════ 5.2. Медиа-запросы ══════════════════════════ */
+@media (max-width: 480px) {
+    .calendar-day span {
+        display: none;
+    }
+
+    .calendar-day.active:hover::after {
+        content: attr(data-count);
+        position: absolute;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 4px;
+        border-radius: 4px;
+        font-size: 10px;
+        z-index: 10;
+    }
+}
+@media (max-width: 768px) {
+    .action-cards-container .row {
+        margin: 0 -15px;
+    }
+    .action-cards-container .col-lg-4,
+    .action-cards-container .col-md-4 {
+        padding: 0 15px;
+    }
+    .action-card .thumb img {
+        max-height: 120px;
+    }
+    .action-card h4 {
+        font-size: 20px;
+    }
+    .action-card p {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    /* Адаптивность для календаря */
+    .calendar-grid,
+    .calendar-weekdays {
+        max-width: 100%;
+        gap: 3px;
+    }
+    .calendar-day {
+        font-size: 10px;
+        padding: 2px;
+    }
+    .weekday {
+        font-size: 10px;
+    }
+}
+@media (max-width: 992px) {
+    .action-card {
+        margin-bottom: 30px;
+    }
+        .action-card .thumb img {
+            max-height: 130px;
+        }
+        .action-card .right-content {
+            padding: 15px 15px 20px 15px;
+        }
+}

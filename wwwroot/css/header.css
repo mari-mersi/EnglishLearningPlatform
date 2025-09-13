@@ -1,0 +1,664 @@
+﻿/*=============================================================
+    Шапка сайта - Навигация и логотип
+===============================================================
+***************************************************************
+Содержание:
+  1. Базовые стили
+  2. Компоненты шапки
+    2.1 Логотип
+    2.2 Навигационное меню
+      2.2.1 Список меню
+      2.2.2 Пункт меню
+      2.2.3 Ссылка меню
+      2.2.4 Бургер
+      2.2.5 Мобильное меню
+    2.3 Кнопки авторизации
+    2.4 Выпадающее меню пользователя
+  3. Утилиты
+    3.1 Вспомогательные классы
+    3.2 Анимации
+      3.2.1 Ховер-эффекты и активное состояние
+      3.2.2 Фокус-состояния и доступность  
+  4. Адаптивность
+**************************************************************/
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                   1. БАЗОВЫЕ СТИЛИ                      ║
+  ╚═════════════════════════════════════════════════════════╝*/
+
+/* Основной стиль хедера */
+.header {
+    background-color: var(--color-bg-primary);
+    box-shadow: var(--shadow-sm);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    z-index: var(--z-index-header);
+    width: 100%;
+    transition: var(--transition-base);
+}
+
+/* Контейнер для центрирования содержимого хедера */
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: min(100% - 30px, 1200px);
+    margin-inline: auto;
+    height: 100%;
+}
+
+/* Левая часть с логотипом */
+.header-left {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Центральная часть с навигацией */
+.header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+/* Правая часть с кнопками авторизации */
+.header-right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Класс для хедера при скролле (уменьшенная версия) */
+.header--scrolled {
+    background-color: var(--color-gray-50);
+    height: var(--header-height-min);
+    box-shadow: var(--shadow-dark);
+    animation: slideDown 0.3s ease-out;
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                   3. КОМПОНЕНТЫ ШАПКИ                   ║
+  ╚═════════════════════════════════════════════════════════╝*/
+
+/* ══════════════ 3.1. Логотип ═════════════════════════════ */
+/* Стили для логотипа в навигации */
+.logo {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    transition: var(--transition-base);
+    text-decoration: none;
+}
+
+/* Изображение логотипа */
+    .logo img {
+        max-height: 60px;
+        width: 280px;
+        height: 35px;
+        object-fit: contain;
+        transition: var(--transition-base);
+    }
+
+/* Уменьшенный логотип в sticky-режиме */
+.header--scrolled .logo img {
+    max-height: 50px;
+}
+
+/* ══════════════ 3.2. Навигационное меню ══════════════════ */
+/* Контейнер основной навигации */
+.navigation {
+    min-height: var(--header-height-min);
+    background: transparent;
+    display: flex;
+    align-items: center;
+}
+
+/* ────────────────── 3.2.1 Список меню ──────────────────── */
+/* Базовые стили для навигационного списка */
+.navigation__list {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background-color: transparent;
+    transition: var(--transition-base);
+    align-items: center;
+    position: relative;
+    z-index: var(--z-index-menu);
+}
+
+/* ────────────────── 3.2.2 Пункт меню ───────────────────── */
+/* Отступы для пунктов меню */
+.navigation__list-item {
+    padding: 0 12px;
+}
+
+/* ────────────────── 3.2.3 Ссылка меню ──────────────────── */
+/* Стили для ссылок в меню */
+.navigation__link {
+    display: block;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--color-gray-800);
+    text-transform: capitalize;
+    transition: var(--transition-base);
+    height: 40px;
+    line-height: 40px;
+    border: transparent;
+    letter-spacing: 0.5px;
+    position: relative;
+    text-decoration: none;
+}
+
+    /* Подчеркивание при наведении и для активной ссылки */
+    .navigation__link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background-color: var(--color-pink-500);
+        transition: var(--transition-base);
+        transform: translateX(-50%);
+    }
+
+/* Активное подчеркивание */
+.navigation__link--active::after,
+.navigation__list-item:hover .navigation__link::after {
+    width: 80%;
+}
+
+/* Активный пункт меню и ховер-эффект */
+.navigation__link--active,
+.navigation__list-item:hover .navigation__link {
+    color: var(--color-pink-500);
+}
+
+/* ────────────────── 3.2.4 Бургер-меню ─────────────────── */
+/* Кнопка гамбургер-меню (скрыта по умолчанию) */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: var(--z-index-menu-toggle);
+}
+
+/* Контейнер для иконки бургера */
+.menu-toggle__icon {
+    width: 24px;
+    height: 18px;
+    position: relative;
+    display: block;
+}
+
+/* Центральная линия бургер-иконки */
+.menu-toggle__line {
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-gray-800);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: var(--transition-base);
+}
+
+    /* Верхняя и нижняя линии бургер-иконки */
+    .menu-toggle__line::before,
+    .menu-toggle__line::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background-color: var(--color-gray-800);
+        left: 0;
+        transition: var(--transition-base);
+    }
+
+    /* Позиционирование верхней линии */
+    .menu-toggle__line::before {
+        top: -8px;
+    }
+
+    /* Позиционирование нижней линии */
+    .menu-toggle__line::after {
+        bottom: -8px;
+    }
+
+/* Состояние открытого меню - превращение в крестик */
+.menu-toggle[aria-expanded="true"] .menu-toggle__line {
+    background-color: transparent;
+}
+
+    /* Анимация верхней линии в крестик */
+    .menu-toggle[aria-expanded="true"] .menu-toggle__line::before {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    /* Анимация нижней линии в крестик */
+    .menu-toggle[aria-expanded="true"] .menu-toggle__line::after {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+/* ────────────────── 3.2.5 Мобильное меню ───────────────── */
+/* Оверлей для мобильного меню */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition-base);
+    z-index: var(--z-index-overlay);
+}
+
+/* Активное состояние оверлея */
+.overlay--active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ══════════════ 3.3 Кнопки авторизации ═══════════════════ */
+/* Контейнер для кнопок авторизации */
+.auth-actions {
+    margin-left: 15px;
+}
+
+/* Flex-контейнер для кнопок */
+.auth-buttons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Базовые стили для кнопок авторизации */
+.auth-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    font-weight: 500;
+    font-size: 15px;
+    text-decoration: none;
+    border-radius: 23px;
+    transition: var(--transition-base);
+    height: 40px;
+    line-height: 24px;
+    border: 1px solid var(--color-pink-500);
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+}
+    /* Убираем подчеркивание для кнопок */
+    .auth-button::after {
+        display: none !important;
+    }
+/* Стили для кнопки входа */
+.auth-button--login {
+    color: var(--color-pink-500);
+    background: transparent;
+}
+
+    /* Ховер-эффект для кнопки входа */
+    .auth-button--login:hover {
+        background-color: var(--color-pink-500);
+        color: var(--color-gray-50);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(239, 57, 149, 0.3);
+    }
+
+/* Стили для кнопки регистрации */
+.auth-button--register {
+    color: var(--color-gray-50);
+    background-color: var(--color-pink-500);
+    border: 1px solid var(--color-pink-500);
+}
+
+    /* Ховер-эффект для кнопки регистрации */
+    .auth-button--register:hover {
+        color: var(--color-gray-50);
+        background-color: var(--color-pink-600);
+        border-color: var(--color-pink-600);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(239, 57, 149, 0.3);
+    }
+
+/* ══════════════ 3.4 Выпадающее меню пользователя ═════════ */
+/* Контейнер выпадающего меню */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Кнопка-переключатель выпадающего меню */
+.dropdown__toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+}
+
+/* Контейнер элементов выпадающего меню */
+.dropdown__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: var(--z-index-dropdown);
+    display: none;
+    min-width: 160px;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    text-align: left;
+    list-style: none;
+    background-color: var(--color-bg-primary);
+    background-clip: padding-box;
+    border: 1px solid var(--color-border-primary);
+    border-radius: 0.375rem;
+    box-shadow: var(--shadow-md);
+}
+
+/* Показываем меню при наличии класса */
+.dropdown--show .dropdown__menu {
+    display: block;
+}
+
+/* Элементы выпадающего меню */
+.dropdown__item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    clear: both;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    text-align: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    transition: var(--transition-base);
+    cursor: pointer;
+}
+
+    /* Ховер-эффекты для пунктов выпадающего меню */
+    .dropdown__item:hover,
+    .dropdown__item:focus {
+        color: var(--color-text-accent);
+        background-color: var(--color-bg-secondary);
+    }
+
+/* Разделительная линия в выпадающем меню */
+.dropdown__divider {
+    height: 0;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    border-top: 1px solid var(--color-border-primary);
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                   4. УТИЛИТЫ                            ║
+  ╚═════════════════════════════════════════════════════════╝*/
+
+/* ══════════════ 4.1. Вспомогательные классы ══════════════ */
+/* Класс для скрытия элементов визуально, но оставления доступными для скринридеров */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Класс для скрытия элемента полностью */
+.hidden {
+    display: none !important;
+}
+
+/* ══════════════ 4.2 Анимации ═════════════════════════════ */
+/* Анимация появления хедера при скролле */
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Анимация плавного появления */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ────────────────── 4.2.1 Фокус-состояния и доступность ── */
+/* Стили для фокуса на ссылках (доступность) */
+.navigation__link:focus,
+.auth-button:focus,
+.dropdown__toggle:focus {
+    outline: 2px solid var(--color-pink-500);
+    outline-offset: 2px;
+}
+
+/* Стили для фокуса внутри выпадающего меню */
+.dropdown__item:focus {
+    outline: 1px solid var(--color-pink-500);
+    outline-offset: -2px;
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                   5. АДАПТИВНОСТЬ                       ║
+  ╚═════════════════════════════════════════════════════════╝*/
+
+/* Мобильные устройства (до 576px) */
+@media (max-width: 576px) {
+    /* Уменьшение логотипа на мобильных */
+    .logo img {
+        max-height: 50px;
+    }
+
+    /* Уменьшение логотипа в sticky-режиме */
+    .header--scrolled .logo img {
+        max-height: 40px;
+    }
+
+    /* Уменьшение отступов в контейнере */
+    .header-container {
+        gap: 10px;
+        width: min(100% - 20px, 1200px);
+    }
+    .auth-button {
+        padding: 5px 12px;
+        font-size: 12px;
+        height: 32px;
+        min-width: 70px; /* Минимальная ширина для очень маленьких экранов */
+    }
+
+    .auth-buttons {
+        gap: 5px;
+    }
+
+    .auth-actions {
+        margin-left: 10px;
+    }
+}
+
+/* Планшеты и мобильные (до 992px) - мобильное меню */
+@media (max-width: 992px) {
+    /* Центральная часть навигации занимает все доступное пространство */
+    .header-center {
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    /* Преобразование горизонтального меню в вертикальное */
+    .navigation__list {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: 100%;
+        flex-direction: column;
+        background-color: var(--color-gray-50);
+        box-shadow: var(--shadow-dark);
+        padding: 20px 0;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+        height: auto;
+        max-height: calc(100vh - var(--header-height));
+        overflow-y: auto;
+        z-index: var(--z-index-menu);
+    }
+
+    /* Корректировка позиции для sticky-хедера */
+    .header--scrolled .navigation__list {
+        top: var(--header-height-min);
+    }
+
+    /* Активное состояние мобильного меню */
+    .navigation__list--active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Полноширинные пункты меню */
+    .navigation__list-item {
+        width: 100%;
+        padding: 0;
+        text-align: center;
+    }
+
+    /* Увеличенная высота ссылок для удобства касания */
+    .navigation__link {
+        height: 50px;
+        line-height: 50px;
+        padding: 0 20px;
+    }
+
+    /* Верхняя граница для первого пункта */
+    .navigation__list-item:first-child {
+        border-top: 1px solid var(--color-gray-300);
+    }
+
+    /* Границы между пунктами меню */
+    .navigation__list-item {
+        border-bottom: 1px solid var(--color-gray-300);
+    }
+
+    /* Высота хедера на мобильных */
+    .header {
+        height: var(--header-height-min);
+    }
+
+    /* Показываем кнопку бургера на мобильных */
+    .menu-toggle {
+        display: flex;
+    }
+
+    /* Адаптивность для выпадающего меню на мобильных */
+    .dropdown {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Статичное позиционирование на мобильных */
+    .dropdown__menu {
+        position: static;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+        margin-top: 0;
+        display: none;
+    }
+
+    /* Показ выпадающего меню на мобильных */
+    .dropdown--show .dropdown__menu {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    /* Стили для элементов выпадающего меню на мобильных */
+    .dropdown__item {
+        text-align: center;
+        padding: 1rem;
+    }
+}
+
+/* Ноутбуки и планшеты (до 1200px) */
+@media (max-width: 1200px) {
+    /* Уменьшение отступов между пунктами */
+    .navigation__list-item {
+        padding: 0 8px;
+    }
+
+    /* Уменьшение размера шрифта */
+    .navigation__link {
+        font-size: 14px;
+    }
+
+    /* Уменьшение кнопок авторизации */
+    .auth-button {
+        padding: 8px 16px;
+        font-size: 14px;
+        height: 36px;
+    }
+
+    /* Уменьшение расстояния между кнопками */
+    .auth-buttons {
+        gap: 8px;
+    }
+}
+
+/* Десктоп (более 992px) */
+@media (min-width: 993px) {
+    /* Скрываем оверлей на десктопе */
+    .overlay {
+        display: none;
+    }
+
+    /* Обеспечиваем правильное отображение выпадающего меню на десктопе */
+    .dropdown__menu {
+        position: absolute;
+    }
+}
+
+/* Высокие экраны */
+@media (min-height: 800px) and (max-width: 992px) {
+    /* Увеличиваем максимальную высоту меню на высоких экранах */
+    .navigation__list {
+        max-height: calc(100vh - var(--header-height) - 40px);
+    }
+}

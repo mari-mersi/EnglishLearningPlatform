@@ -1,0 +1,73 @@
+﻿@model EnglishLearningPlatform.Models.Word
+@using EnglishLearningPlatform.Models;
+
+@{
+    ViewData["Title"] = "Слово удалено";
+    ViewData["CurrentPage"] = "words";
+}
+
+<!-- Хлебные крошки -->
+<div class="breadcrumb mb-4">
+    <a asp-action="Index" class="text-violet">Словарь</a>
+    <span class="mx-2">/</span>
+    <span class="text-muted">Удаление завершено</span>
+</div>
+
+<!-- Сообщение об успехе -->
+<div class="delete-confirmed-container text-center">
+    <div class="success-icon mb-4">
+        <i class="bi bi-check-circle-fill text-success"></i>
+    </div>
+    
+    <h1 class="delete-confirmed-title text-success mb-3">Слово успешно удалено!</h1>
+    
+    <p class="delete-confirmed-message text-muted mb-4">
+        Слово "<strong>@Model.EnglishWord</strong>" было полностью удалено из вашего словаря.
+    </p>
+
+    <!-- Информация об удаленном слове -->
+    <div class="deleted-word-info rounded-3 mb-4">
+        <h5 class="mb-3">
+            <i class="bi bi-info-circle text-violet me-2"></i>
+            Удаленная информация:
+        </h5>
+        
+        <div class="text-start">
+            <div class="detail-item mb-2">
+                <strong>Английское слово:</strong>
+                <span class="ms-2">@Model.EnglishWord</span>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.Translation))
+            {
+                <div class="detail-item mb-2">
+                    <strong>Перевод:</strong>
+                    <span class="ms-2">@Model.Translation</span>
+                </div>
+            }
+            
+            <div class="detail-item mb-2">
+                <strong>Дата добавления:</strong>
+                <span class="ms-2">@Model.CreatedDate.ToString("dd.MM.yyyy")</span>
+            </div>
+            
+            <div class="detail-item">
+                <strong>Статус:</strong>
+                <span class="ms-2 badge @(Model.IsLearned ? "bg-success" : "bg-warning")">
+                    @(Model.IsLearned ? "Было изучено" : "Не было изучено")
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопки действий -->
+    <div class="action-buttons">
+        <a asp-action="Index" class="btn btn-primary btn-lg">
+            <i class="bi bi-book me-2"></i>Вернуться к словарю
+        </a>
+        
+        <a asp-action="Create" class="btn btn-outline-violet btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>Добавить новое слово
+        </a>
+    </div>
+</div>

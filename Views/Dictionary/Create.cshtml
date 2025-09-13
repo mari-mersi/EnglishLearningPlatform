@@ -1,0 +1,349 @@
+﻿@model EnglishLearningPlatform.ViewModels.CreateWordViewModel
+
+@{
+    ViewData["Title"] = "Добавить слово";
+}
+
+<!-- Хлебные крошки -->
+<div class="breadcrumb mb-4">
+    <a asp-action="Index" class="text-violet">Словарь</a>
+    <span class="mx-2">/</span>
+    <span class="text-muted">Добавить слово</span>
+</div>
+
+<!-- Заголовок -->
+<div class="create-word-header">
+    <h1 class="create-word-title">Добавить новое слово</h1>
+    <p class="create-word-subtitle">Заполните информацию о слове для изучения</p>
+</div>
+
+<div class="create-word-container">
+    <form asp-action="Create" class="create-word-form" id="createWordForm">
+        @Html.AntiForgeryToken()
+
+        <!-- Основная информация -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="bi bi-info-circle"></i>Основная информация
+            </h3>
+
+            <div class="form-group">
+                <label asp-for="EnglishWord" class="form-label">
+                    <i class="bi bi-translate"></i>Английское слово *
+                </label>
+                <input asp-for="EnglishWord" class="form-control" placeholder="Введите слово на английском" />
+                <span asp-validation-for="EnglishWord" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Translation" class="form-label">
+                    <i class="bi bi-chat-square-text"></i>Перевод
+                </label>
+                <input asp-for="Translation" class="form-control" placeholder="Введите перевод на русский (опционально)" />
+            </div>
+
+            <!-- Подсказка -->
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i> Английское слово обязательно для заполнения.
+                Если не указать перевод, слово будет добавлено в список для редактирования.
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Transcription" class="form-label">
+                    <i class="bi bi-mic"></i>Транскрипция
+                </label>
+                <input asp-for="Transcription" class="form-control" placeholder="Например: /ˈæpl/" />
+                <small class="form-text">Международная фонетическая транскрипция (опционально)</small>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="PartOfSpeech" class="form-label">
+                    <i class="bi bi-tag"></i>Часть речи
+                </label>
+                <select asp-for="PartOfSpeech" class="form-control">
+                    <option value="">Выберите часть речи (опционально)</option>
+                    <option value="noun">Существительное</option>
+                    <option value="verb">Глагол</option>
+                    <option value="adjective">Прилагательное</option>
+                    <option value="adverb">Наречие</option>
+                    <option value="preposition">Предлог</option>
+                    <option value="conjunction">Союз</option>
+                    <option value="pronoun">Местоимение</option>
+                    <option value="interjection">Междометие</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Дополнительная информация -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="bi bi-plus-circle"></i>Дополнительная информация
+            </h3>
+
+            <div class="form-group">
+                <label asp-for="Example" class="form-label">
+                    <i class="bi bi-chat-quote"></i>Пример использования
+                </label>
+                <textarea asp-for="Example" class="form-control" rows="3"
+                          placeholder="Пример предложения с этим словом (опционально)"></textarea>
+                <small class="form-text">Поможет лучше запомнить слово в контексте</small>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ImageUrl" class="form-label">
+                    <i class="bi bi-image"></i>Ссылка на изображение
+                </label>
+                <input asp-for="ImageUrl" class="form-control"
+                       placeholder="https://example.com/image.jpg (опционально)" />
+                <small class="form-text">URL изображения, которое ассоциируется со словом</small>
+
+                <!-- Превью изображения -->
+                <div class="image-preview-container">
+                    <img src="" class="image-preview"
+                         onerror="this.style.display='none'" alt="Предпросмотр изображения" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="bi bi-bar-chart"></i>Сложность слова
+                </label>
+                <input type="hidden" asp-for="DifficultyLevel" value="1" />
+                <div class="difficulty-stars">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">☆</span>
+                    <span class="star" data-value="3">☆</span>
+                    <span class="star" data-value="4">☆</span>
+                    <span class="star" data-value="5">☆</span>
+                </div>
+                <small class="form-text">Оцените сложность запоминания слова (опционально)</small>
+            </div>
+        </div>
+
+        <!-- Статус изучения -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="bi bi-check-circle"></i>Статус изучения
+            </h3>
+
+            <div class="form-check">
+                <input asp-for="IsLearned" class="form-check-input" />
+                <label asp-for="IsLearned" class="form-check-label">
+                    Отметить как выученное
+                </label>
+            </div>
+            <small class="form-text">Если слово уже изучено, отметьте этот флажок (опционально)</small>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="form-actions">
+            <button type="submit" class="btn-create">
+                <i class="bi bi-plus-circle"></i> Добавить слово
+            </button>
+            <a asp-action="Index" class="btn-cancel">
+                <i class="bi bi-x-circle"></i> Отмена
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Модальное окно для дубликатов -->
+@if (Model.WordExists)
+{
+    <div class="modal fade show" id="duplicateModal" tabindex="-1" aria-labelledby="duplicateModalLabel" aria-modal="true" style="display: block; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="duplicateModalLabel">
+                        <i class="bi bi-exclamation-triangle"></i> Слово уже существует!
+                    </h5>
+                    <button type="button" class="btn-close" onclick="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Слово "<strong>@Model.EnglishWord</strong>" уже есть в вашем словаре.</p>
+                    <p>Перевод: @(string.IsNullOrEmpty(Model.ExistingWordTranslation) ? "не указан" : Model.ExistingWordTranslation)</p>
+                    
+                    <form id="duplicateForm" asp-action="HandleDuplicate" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="EnglishWord" />
+                        <input type="hidden" asp-for="Translation" />
+                        <input type="hidden" asp-for="ImageUrl" />
+                        <input type="hidden" asp-for="IsLearned" />
+                        <input type="hidden" asp-for="Transcription" />
+                        <input type="hidden" asp-for="Example" />
+                        <input type="hidden" asp-for="PartOfSpeech" />
+                        <input type="hidden" asp-for="DifficultyLevel" />
+                        <input type="hidden" asp-for="ExistingWordId" />
+                        
+                        <div class="form-group mt-3">
+                            <label class="form-label fw-semibold">Выберите действие:</label>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" asp-for="ActionChoice" value="view" id="actionView" checked>
+                                <label class="form-check-label" for="actionView">
+                                    Перейти к существующему слову
+                                </label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" asp-for="ActionChoice" value="replace" id="actionReplace">
+                                <label class="form-check-label" for="actionReplace">
+                                    Заменить существующее слово (обновить)
+                                </label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" asp-for="ActionChoice" value="create_new" id="actionCreateNew">
+                                <label class="form-check-label" for="actionCreateNew">
+                                    Создать другое слово (очистить форму)
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="submitDuplicateForm()">Продолжить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script>
+        // Функции для модального окна
+        function closeModal() {
+            window.location.href = '@Url.Action("Create")';
+        }
+
+        function submitDuplicateForm() {
+            document.getElementById('duplicateForm').submit();
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const radioButtons = document.querySelectorAll('.form-check-input');
+            radioButtons.forEach(radio => {
+                radio.style.width = '18px';
+                radio.style.height = '18px';
+                radio.style.marginRight = '8px';
+            });
+
+            // Функциональность звезд рейтинга
+            const stars = document.querySelectorAll('.star');
+            const difficultyInput = document.querySelector('#DifficultyLevel');
+
+            // Инициализация звезд
+            function initializeStars() {
+                const currentValue = parseInt(difficultyInput.value) || 1;
+                stars.forEach((star, index) => {
+                    if (index < currentValue) {
+                        star.innerHTML = '★';
+                        star.classList.add('active');
+                    } else {
+                        star.innerHTML = '☆';
+                        star.classList.remove('active');
+                    }
+                });
+            }
+
+            initializeStars();
+
+            stars.forEach((star, index) => {
+                star.addEventListener('click', () => {
+                    // Устанавливаем значение сложности
+                    difficultyInput.value = index + 1;
+
+                    // Обновляем визуальное отображение звезд
+                    stars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.innerHTML = '★';
+                            s.classList.add('active');
+                        } else {
+                            s.innerHTML = '☆';
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+
+                star.addEventListener('mouseover', () => {
+                    stars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.innerHTML = '★';
+                        } else {
+                            s.innerHTML = '☆';
+                        }
+                    });
+                });
+
+                star.addEventListener('mouseout', () => {
+                    const currentValue = parseInt(difficultyInput.value) || 1;
+                    stars.forEach((s, i) => {
+                        if (i < currentValue) {
+                            s.innerHTML = '★';
+                        } else {
+                            s.innerHTML = '☆';
+                        }
+                    });
+                });
+            });
+
+            // Превью изображения
+            const imageUrlInput = document.querySelector('#ImageUrl');
+            const imagePreview = document.querySelector('.image-preview');
+
+            // Изначально скрываем превью
+            imagePreview.style.display = 'none';
+
+            imageUrlInput.addEventListener('input', function() {
+                if (this.value) {
+                    imagePreview.src = this.value;
+                    imagePreview.style.display = 'block';
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
+
+            // Валидация формы
+            const form = document.getElementById('createWordForm');
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+
+                // Проверка только английского слова
+                const englishWordField = document.querySelector('#EnglishWord');
+                if (!englishWordField) {
+                    console.error('EnglishWord field not found');
+                    return;
+                }
+                if (!englishWordField.value.trim()) {
+                    isValid = false;
+                    englishWordField.classList.add('input-validation-error');
+
+                    // Создаем сообщение об ошибке, если его нет
+                    if (!englishWordField.nextElementSibling || !englishWordField.nextElementSibling.classList.contains('field-validation-error')) {
+                        const errorSpan = document.createElement('span');
+                        errorSpan.className = 'field-validation-error';
+                        errorSpan.textContent = 'Английское слово обязательно для заполнения';
+                        englishWordField.parentNode.insertBefore(errorSpan, englishWordField.nextSibling);
+                    }
+                } else {
+                    englishWordField.classList.remove('input-validation-error');
+                    // Удаляем сообщение об ошибке, если оно есть
+                    if (englishWordField.nextElementSibling && englishWordField.nextElementSibling.classList.contains('field-validation-error')) {
+                        englishWordField.nextElementSibling.remove();
+                    }
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    // Прокрутка к ошибке
+                    englishWordField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    englishWordField.focus();
+                }
+            });
+
+            // Автоматическое обновление превью при загрузке страницы, если URL уже есть
+            if (imageUrlInput.value) {
+                imagePreview.src = imageUrlInput.value;
+                imagePreview.style.display = 'block';
+            }
+        });
+    </script>
+}

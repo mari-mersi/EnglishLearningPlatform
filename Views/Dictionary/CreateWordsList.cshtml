@@ -1,0 +1,94 @@
+﻿@model EnglishLearningPlatform.ViewModels.CreateWordViewModel
+
+@{
+    ViewData["Title"] = "Добавить список слов";
+    ViewData["CurrentPage"] = "words";
+}
+
+<!-- Хлебные крошки -->
+<div class="breadcrumb mb-4">
+    <a asp-action="Index" class="text-violet">Словарь</a>
+    <span class="mx-2">/</span>
+    <span class="text-muted">Добавить список слов</span>
+</div>
+
+<!-- Заголовок -->
+<div class="create-word-header">
+    <h1 class="create-word-title">Добавить список слов</h1>
+    <p class="create-word-subtitle">Загрузите текст или файл с английскими словами</p>
+</div>
+
+<div class="create-word-container">
+    <form asp-action="CreateWordsList" method="post" enctype="multipart/form-data" id="createWordsListForm">
+        @Html.AntiForgeryToken()
+
+        <!-- Секция для списка слов -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="bi bi-list-check"></i>Добавить список слов
+            </h3>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                Вы можете добавить несколько слов сразу из текста или файла.
+                Система автоматически извлечет английские слова.
+            </div>
+
+            @if (!ViewData.ModelState.IsValid) {
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors)) {
+                        <p>@error.ErrorMessage</p>
+                    }
+                </div>
+            }
+
+            <div class="form-group">
+                <label asp-for="WordListText" class="form-label">
+                    <i class="bi bi-textarea-t"></i>Текст со словами
+                </label>
+                <textarea asp-for="WordListText" class="form-control" rows="5"
+                          placeholder="Введите текст на английском или загрузите файл..."></textarea>
+                <small class="form-text">Система автоматически найдет все английские слова</small>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="WordListFile" class="form-label">
+                    <i class="bi bi-file-earmark-text"></i>Или загрузите файл
+                </label>
+                <input asp-for="WordListFile" type="file" class="form-control"
+                       accept=".txt,.text" />
+                <small class="form-text">Поддерживаются TXT файлы</small>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <button type="submit" class="btn-create">
+                    <i class="bi bi-search"></i> Извлечь слова из текста
+                </button>
+                <a asp-action="Index" class="btn-cancel">
+                    <i class="bi bi-arrow-left"></i> Назад к словарю
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('createWordsListForm');
+
+            form.addEventListener('submit', function(e) {
+                const textArea = document.querySelector('#WordListText');
+                const fileInput = document.querySelector('#WordListFile');
+
+                // Проверяем, что хотя бы одно поле заполнено
+                if (!textArea.value.trim() && (!fileInput.files || fileInput.files.length === 0)) {
+                    e.preventDefault();
+                    alert('Пожалуйста, введите текст или загрузите файл');
+                    return false;
+                }
+            });
+        });
+    </script>
+}

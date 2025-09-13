@@ -1,0 +1,870 @@
+﻿/*=============================================================
+    Словарь - Управление словами и обучение
+===============================================================
+***************************************************************
+Содержание:
+  1. Структура страницы
+    1.1 Основной контейнер
+    1.2 Детальная страница слова
+  2. Компоненты
+    2.1 Карточки слов
+    2.2 Бейджи и статусы
+    2.3 Формы управления
+    2.4 Кнопки действий
+    2.5 Изображения и медиа
+  3. Текстовые блоки
+    3.1 Рекламный заголовок
+    3.2 Текстовой контент
+    3.3 Обрамление элементов
+  4. Утилиты
+    4.1 Вспомогательные классы
+    4.2 Анимации
+      4.2.1 Ховер-эффекты и активное состояние
+      4.2.2 Фокус-состояния и доступность  
+    4.3 Валидация форм
+  5. Адаптивность
+**************************************************************/
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  1. СТРУКТУРА СТРАНИЦЫ                  ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ═══════════ 1.1. Основной контейнер ═════════════════════ */
+.words-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+.words-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+.word-card-container {
+    padding: 20px 0;
+}
+/* ═══════════ 1.2. Детальная страница слова ═══════════════ */
+.word-detail-container {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+.word-detail-image {
+    border-radius: var(--radius-md);
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+.word-info {
+    padding: 2rem;
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  2. КОМПОНЕНТЫ                          ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ═══════════ 2.1. Карточки слов ══════════════════════════ */
+.word-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    position: relative;
+    z-index: var(--z-index-cards);
+}
+    .word-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(114, 106, 227, 0.15);
+    }
+    .word-card .thumb {
+        position: relative;
+        text-align: center;
+        padding: 20px;
+        background: var(--color-gray-100);
+        border-radius: 15px 15px 0 0;
+        min-height: 190px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+        .word-card .thumb img {
+            max-height: 150px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+    .word-card:hover .thumb img {
+        transform: scale(1.05);
+    }
+    .word-card .right-content {
+        padding: 20px;
+    }
+    .word-card h4 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--color-gray-800);
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .word-card p {
+        color: var(--color-gray-500) !important;
+        font-weight: 400;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        min-height: 2.2rem;
+    }
+    .word-card .text-danger {
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+.word-card-item {
+    transition: all 0.3s ease;
+    min-width: 0; /* Важно для предотвращения переполнения */
+}
+/* Для пустого состояния */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+/* ═══════════ 2.2. Бейджи и статусы ═══════════════════════ */
+.learning-status-badge {
+    top: 10px;
+    left: 10px;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    position: absolute;
+    z-index: var(--z-index-badge);
+}
+    .learning-status-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .learning-status-badge.status-learned {
+        background: var(--gradient-success);
+    }
+    .learning-status-badge.status-not-learned {
+        background: var(--color-blue-500) !important;
+        color: white !important;
+    }
+    .learning-status-badge i {
+        margin-right: 4px;
+    }
+.translation-badge {
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, var(--color-yellow-900), var(--color-yellow-500));
+    color: var(--color-gray-800);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: absolute;
+    z-index: var(--z-index-badge);
+}
+    .translation-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .translation-badge i {
+        margin-right: 4px;
+    }
+.word-status {
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.status-learned {
+    background: var(--gradient-success);
+    color: white;
+}
+.status-not-learned {
+    background: var(--gradient-danger);
+    color: white;
+}
+.badge {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+}
+.bg-success {
+    background-color: var(--color-green-500);
+}
+.bg-warning {
+    background-color: var(--color-yellow-500) !important;
+    color: var(--color-gray-950) !important;
+}
+.text-success {
+    color: var(--color-green-500);
+}
+.text-danger {
+    transition: all 0.3s;
+}
+    .text-danger:hover {
+        color: var(--color-orange-700) !important;
+        transform: translateY(-1px);
+    }
+/* ═══════════ 2.3. Формы управления ═══════════════════════ */
+.create-word-container {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+    animation: fadeIn 0.6s ease-out;
+    position: relative;
+    z-index: var(--z-index-interactive);
+}
+.create-word-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+.create-word-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-gray-800);
+    margin-bottom: 1rem;
+}
+.create-word-subtitle {
+    color: var(--color-gray-400);
+    font-size: 1.1rem;
+}
+.create-word-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--color-gray-100);
+    border-radius: 15px;
+    border-left: 4px solid var(--color-violet-500);
+    animation: fadeIn 0.8s ease-out;
+}
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-gray-800);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+    .section-title i {
+        color: var(--color-violet-500);
+        margin-right: 10px;
+        font-size: 1.5rem;
+    }
+.form-group {
+    margin-bottom: 1.5rem;
+    width: 100%;
+    max-width: 400px;
+}
+.form-label {
+    font-weight: 600;
+    color: var(--color-gray-800);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+    .form-label i {
+        color: var(--color-violet-500);
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+.form-control {
+    border: 2px solid var(--color-gray-200);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+    position: relative;
+}
+    .form-control:focus {
+        border-color: var(--color-pink-500) !important;
+        box-shadow: 0 0 0 0.2rem rgba(239, 57, 150, 0.25) !important;
+        outline: none !important;
+        transform: translateY(-2px);
+    }
+.form-text {
+    font-size: 0.85rem;
+    color: var(--color-gray-400);
+    margin-top: 0.3rem;
+}
+.form-check {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+}
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    border: 2px solid var(--color-violet-500);
+}
+    .form-check-input:checked {
+        background-color: var(--color-violet-500);
+        border-color: var(--color-violet-500);
+    }
+.form-check-label {
+    font-weight: 500;
+    color: var(--color-gray-800);
+    cursor: pointer;
+}
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-gray-200);
+}
+.delete-word-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.delete-word-header {
+    margin-bottom: 2.5rem;
+}
+.delete-word-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-orange-500) !important;
+    margin-bottom: 1rem;
+}
+.delete-word-subtitle {
+    color: var(--color-gray-400);
+    font-size: 1.2rem;
+}
+.delete-word-image {
+    border-radius: 15px;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.delete-confirmed-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.6s ease-out;
+}
+.delete-confirmed-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+    .delete-confirmed-title.text-success {
+        color: var(--color-green-500) !important;
+        border: var(--color-green-700) !important;
+        text-shadow: 0 0 3px rgba(0,0,0,0.1);
+    }
+.delete-confirmed-message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+/* ═══════════ 2.4. Кнопки действий ════════════════════════ */
+.word-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 15px;
+}
+.card-button {
+    display: inline-block;
+    padding: 8px 16px;
+    color: white !important;
+    border-radius: 20px;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    min-width: 100px;
+}
+    .card-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        color: var(--color-gray-50) !important;
+        text-decoration: none;
+    }
+.btn-primary {
+    background-color: var(--color-orange-500) !important;
+    border-color: var(--color-orange-500) !important;
+    transition: all 0.3s;
+    position: relative;
+}
+    .btn-primary:hover {
+        background-color: var(--color-orange-600) !important;
+        border-color: var(--color-orange-600) !important;
+        transform: translateY(-2px);
+    }
+.btn-create {
+    background: linear-gradient(135deg, var(--color-orange-500), var(--color-pink-500)) !important;
+    border: none;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+    .btn-create:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(114, 106, 227, 0.3);
+        background: linear-gradient(135deg, var(--color-violet-700), var(--color-violet-900));
+        color: white;
+    }
+.btn-cancel {
+    background: var(--color-gray-400) !important;
+    border: none;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+    .btn-cancel:hover {
+        background: var(--color-gray-500) !important;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+.btn-danger {
+    background: linear-gradient(135deg, var(--color-green-500), var(--color-green-700)) !important;
+    border: none;
+}
+    .btn-danger:hover {
+        background: linear-gradient(135deg, var(--color-orange-700), var(--color-orange-900));
+    }
+.btn-warning {
+    background-color: var(--color-orange-500) !important;
+    /*border-color: var(--color-orange-500) !important;*/
+    border: none;
+    color: white;
+}
+    .btn-warning:hover {
+        background: linear-gradient(135deg, var(--color-orange-300), var(--color-orange-700));
+        color: white;
+    }
+.btn-lg {
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+    .btn-lg:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+.btn-outline-violet {
+    border: 2px solid var(--color-violet-500);
+    color: var(--color-violet-500);
+    background: transparent;
+}
+    .btn-outline-violet:hover {
+        background: var(--color-violet-500);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(114, 106, 227, 0.3);
+    }
+.btn-outline-danger {
+    color: var(--color-pink-500) !important;
+    border-color: var(--color-pink-500) !important;
+}
+
+    .btn-outline-danger:hover {
+        background-color: var(--color-pink-500) !important;
+        color: white !important;
+    }
+/* ═══════════ 2.5. Изображения и медиа ════════════════════ */
+.word-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+.image-preview-container {
+    text-align: center;
+    margin-top: 1rem;
+}
+.image-preview {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    border: 2px dashed var(--color-violet-500);
+    padding: 10px;
+    height: 200px;
+    width: auto;
+    object-fit: contain;
+}
+.image-placeholder {
+    background: linear-gradient(135deg, var(--color-violet-500), var(--color-violet-700));
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px;
+}
+.difficulty-stars {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+.star {
+    font-size: 1.5rem;
+    color: var(--color-orange-200);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+    .star.active {
+        color: var(--color-orange-300);
+    }
+    .star:hover {
+        transform: scale(1.2);
+    }
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  3. ТЕКСТОВЫЕ БЛОКИ                     ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ═══════════ 3.1. Рекламный заголовок ════════════════════ */
+.create-word-header,
+.delete-word-header {
+    text-align: center;
+}
+.create-word-title,
+.delete-word-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+/* ═══════════ 3.2. Текстовой контент ══════════════════════ */
+.create-word-subtitle,
+.delete-word-subtitle {
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+}
+/* ═══════════ 3.3. Обрамление элементов ═══════════════════ */
+.deleted-word-info {
+    border-left: 4px solid var(--color-violet-900);
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: var(--color-gray-100);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
+.detail-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-gray-100);
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+    .detail-item strong {
+        min-width: 150px;
+        color: var(--color-gray-600);
+    }
+.transcription {
+    font-family: 'Courier New', monospace;
+    background: var(--color-gray-100);
+    padding: 0.3rem 0.8rem;
+    border-radius: 8px;
+    display: inline-block;
+}
+.fourth-skill-item .progress .progress-bar {
+    border-color: var(--color-orange-300);
+}
+.fourth-skill-item .progress .progress-left .progress-bar {
+    animation: loading-4 1.5s linear forwards 1.8s;
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  4. УТИЛИТЫ                             ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ═══════════ 4.1. Вспомогательные классы ═════════════════ */
+.breadcrumb {
+    font-size: 1.1rem;
+}
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+    .stat-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+.progress-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.additional-stat {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    height: 100%;
+}
+.stat-number {
+    transition: all 0.3s ease;
+}
+.stat-card:hover .stat-number {
+    transform: scale(1.1);
+}
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+/* ═══════════ 4.2. Анимации ═══════════════════════════════ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+.success-icon {
+    animation: scaleIn 0.5s ease-out;
+    font-size: 4rem;
+}
+/* ──────────────── 4.2.1 Ховер-эффекты и активное состояние */
+.word-card .text-danger:hover {
+    transform: translateY(-1px);
+    color: var(--color-orange-700) !important;
+}
+/* ──────────────── 4.2.2 Фокус-состояния и доступность ──── */
+.form-control:focus,
+.card-button:focus,
+.btn-primary:focus,
+.btn-create:focus,
+.btn-cancel:focus {
+    outline: 2px solid var(--color-pink-500);
+    outline-offset: 2px;
+}
+/* ═══════════ 4.3. Валидация форм ═════════════════════════ */
+.validation-summary-errors {
+    background: linear-gradient(135deg, var(--color-orange-500), var(--color-orange-700));
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    animation: shake 0.5s ease-in-out;
+}
+.field-validation-error {
+    color: var(--color-orange-500);
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: block;
+    margin-top: 0.3rem;
+}
+.input-validation-error {
+    border-color: var(--color-orange-500) !important;
+    background-color: var(--color-gray-100);
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  5. АДАПТИВНОСТЬ                        ║
+  ╚═════════════════════════════════════════════════════════╝*/
+@media (max-width: 768px) {
+    .words-grid-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .word-card-item {
+        margin-bottom: 1rem;
+    }
+
+    .word-card .thumb {
+        min-height: 160px;
+        padding: 15px;
+    }
+
+        .word-card .thumb img {
+            max-height: 120px;
+        }
+
+    .word-card h4 {
+        font-size: 1.1rem;
+    }
+
+    .word-card p {
+        font-size: 1rem;
+    }
+
+    .word-card-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .card-button {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .learning-status-badge,
+    .translation-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+        position: relative;
+        z-index: var(--z-index-badge);
+    }
+
+    .create-word-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .create-word-title {
+        font-size: 2rem;
+    }
+
+    .form-section {
+        padding: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .btn-create,
+    .btn-cancel {
+        width: 100%;
+    }
+
+    .delete-confirmed-container {
+        padding: 2rem;
+        margin: 1rem;
+    }
+
+    .delete-confirmed-title {
+        font-size: 1.8rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn-lg {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .image-preview {
+        height: 150px;
+        max-height: 150px;
+    }
+
+    .stat-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .stat-number {
+        font-size: 1.8rem !important;
+    }
+
+    .stat-icon i {
+        font-size: 2rem !important;
+    }
+}
+@media (max-width: 992px) {
+    .words-grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .skill-item {
+        margin-bottom: 30px;
+    }
+}

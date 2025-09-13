@@ -1,0 +1,70 @@
+﻿@{
+	ViewData["Title"] = "Главная страница";
+	Layout = "_Layout";
+}
+@* Верхний баннер *@
+<div class="intro-banner">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-12">
+				@* Логотип сайта *@
+				<p>
+					<b>
+						<span class="text-pink">English</span>
+						<span class="text-violet">Learning</span>
+						<span class="text-orange">Platform</span>
+					</b>
+				</p>
+				<h1>Добро пожаловать, Мария</h1>
+				<h4>Изучайте английский язык эффективно и с удовольствием.</h4>
+				<div class="first-button scroll-to-section">
+					<a asp-controller="Home" asp-action="Homepage1">Начать</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* Карточки действий *@
+<div class="action-cards-container">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-4 col-md-4 col-sm-12">
+				<div class="action-card">
+					<div class="thumb">
+						<a asp-controller="Words" asp-action="Index"><img src="~/images/cat-dictionary.png" alt="Словарь"></a>
+					</div>
+					<div class="right-content">
+						<h4>Словарь</h4>
+						<p>Создавайте свою коллекцию слов с переводами и картинками</p>
+						<a class="action-button" asp-controller="Words" asp-action="Index">Перейти к словарю</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-12">
+				<div class="action-card">
+					<div class="thumb">
+						<a asp-controller="Trainer" asp-action="Index"><img src="~/images/cat-trainer.png" alt="Тренажеры"></a>
+					</div>
+					<div class="right-content">
+						<h4>Тренажеры</h4>
+						<p>Практикуйте слова через различные упражнения и игры</p>
+						<a class="action-button" asp-controller="Trainer" asp-action="Index">Начать тренировку</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-12">
+				<div class="action-card">
+					<div class="thumb">
+						<a asp-controller="Home" asp-action="Statistics"><img src="~/images/cat-statistics.png" alt="Статистика"></a>
+					</div>
+					<div class="right-content">
+						<h4>Статистика</h4>
+						<p>Отслеживайте прогресс и достижения в изучении</p>
+						<a class="action-button" asp-controller="Home" asp-action="Statistics">Посмотреть статистику</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

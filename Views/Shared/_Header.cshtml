@@ -1,0 +1,219 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<!-- Основной контейнер хедера -->
+<header class="header" id="header">
+    <div class="header-container">
+        <!-- Левая часть - логотип -->
+        <div class="header-left">
+            <a href="/" class="logo" aria-label="На главную страницу">
+                <img src="~/images/logo.png" alt="Логотип">
+            </a>
+        </div>
+
+        <!-- Центральная часть - основная навигация -->
+        <div class="header-center">
+            <nav class="navigation" aria-label="Основная навигация">
+                <!-- Список навигационных ссылок -->
+                <ul class="navigation__list" id="mainNav">
+                    <!-- Основные пункты меню -->
+                    <li class="navigation__list-item"><a class="navigation__link" asp-controller="Home" asp-action="Index">Главная</a></li>
+                    <li class="navigation__list-item"><a class="navigation__link" asp-controller="Dictionary" asp-action="Index">Словарь</a></li>
+                    <li class="navigation__list-item"><a class="navigation__link" href="#lessons">Уроки</a></li>
+                    <li class="navigation__list-item"><a class="navigation__link" asp-controller="Trainer" asp-action="Index">Тренажеры</a></li>
+                    @*<li class="navigation__list-item"><a class="navigation__link" href="#ai-practice">Практика с ИИ</a></li>*@
+                    <li class="navigation__list-item"><a class="navigation__link" href="#statistics">Статистика</a></li>
+                    @*<li class="navigation__list-item"><a class="navigation__link" href="#community">Сообщество</a></li>*@
+                </ul>
+
+                <!-- Кнопка гамбургер-меню для мобильных устройств -->
+                <button class="menu-toggle" id="menuTrigger" aria-label="Открыть меню" aria-expanded="false">
+                    <!-- Скрытый текст для скринридеров -->
+                    <span class="sr-only">Menu</span>
+                    <!-- Иконка гамбургер-меню -->
+                    <span class="menu-toggle__icon">
+                        <span class="menu-toggle__line"></span>
+                    </span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Правая часть - авторизация -->
+        <div class="header-right">
+            @if (SignInManager.IsSignedIn(User)) {
+                <!-- Блок для авторизованных пользователей -->
+                <!-- Выпадающее меню пользователя -->
+                <div class="dropdown">
+                    <!-- Кнопка-переключатель меню пользователя -->
+                    <a href="#" class="dropdown__toggle" id="userDropdown" role="button" aria-expanded="false">
+                        <!-- Иконка пользователя и имя -->
+                        <i class="fas fa-user"></i> @User.Identity?.Name
+                    </a>
+                    <!-- Содержимое выпадающего меню -->
+                    <ul class="dropdown__menu" aria-labelledby="userDropdown">
+                        <li><a class="dropdown__item" asp-controller="Account" asp-action="Profile">Профиль</a></li>
+                        <li><a class="dropdown__item" asp-controller="Account" asp-action="EditProfile">Редактировать профиль</a></li>
+                        <li><a class="dropdown__item" asp-controller="Account" asp-action="ChangePassword">Сменить пароль</a></li>
+                        <li><hr class="dropdown__divider"></li>
+                        <li>
+                            <!-- Форма для выхода из системы -->
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                <button type="submit" class="dropdown__item">Выйти</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            }
+            else {
+                <!-- Блок для неавторизованных пользователей -->
+                <div class="auth-actions">
+                    <div class="auth-buttons">
+                        <!-- Кнопки входа и регистрации -->
+                        <a asp-controller="Account" asp-action="Login" class="auth-button auth-button--login">Вход</a>
+                        <a asp-controller="Account" asp-action="Register" class="auth-button auth-button--register">Регистрация</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</header>
+
+<!-- Оверлей для мобильного меню -->
+<div class="overlay" id="menuOverlay"></div>
+
+<script>
+    // JavaScript для управления поведением хедера
+    document.addEventListener('DOMContentLoaded', function() {
+        // Получаем элементы DOM с проверкой на null
+        const header = document.getElementById('header');
+        const menuTrigger = document.getElementById('menuTrigger');
+        const nav = document.getElementById('mainNav');
+        const overlay = document.getElementById('menuOverlay');
+        const dropdowns = document.querySelectorAll('.dropdown');
+
+        // Безопасно получаем все ссылки меню
+        const allMenuLinks = nav ? nav.querySelectorAll('.navigation__link') : [];
+
+        // Удаляем активный класс с главной страницы по умолчанию
+        const homeLinks = document.querySelectorAll('a[href="/"], a[href="/Home"], a[href="/Home/Index"]');
+        homeLinks.forEach(link => link.classList.remove('navigation__link--active'));
+
+        // Функция для определения и установки активного пункта меню на основе текущего URL
+        function setActiveMenuBasedOnUrl() {
+            const currentPath = window.location.pathname.toLowerCase();
+
+            // Сбрасываем все активные состояния
+            allMenuLinks.forEach(link => {
+                link.classList.remove('navigation__link--active');
+                link.removeAttribute('aria-current');
+            });
+
+            // Проверяем каждую ссылку на соответствие текущему пути
+            allMenuLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href) return;
+
+                // Для обычных ссылок (не якорных)
+                if (!href.startsWith('#')) {
+                    const linkPath = href.toLowerCase();
+
+                    // Проверяем различные условия соответствия
+                    if (currentPath === linkPath ||
+                        (linkPath !== '/' && currentPath.startsWith(linkPath)) ||
+                        (currentPath === '/' && (linkPath === '/' || linkPath === '/home' || linkPath === '/home/index'))) {
+                        link.classList.add('navigation__link--active');
+                        link.setAttribute('aria-current', 'page');
+                    }
+                }
+            });
+        }
+
+        // Функция для закрытия мобильного меню
+        function closeMenu() {
+            if (menuTrigger) menuTrigger.setAttribute('aria-expanded', 'false');
+            if (nav) nav.classList.remove('navigation__list--active');
+            if (overlay) overlay.classList.remove('overlay--active');
+            document.body.classList.remove('menu-open');
+        }
+
+        // Функция для открытия мобильного меню
+        function openMenu() {
+            if (menuTrigger) menuTrigger.setAttribute('aria-expanded', 'true');
+            if (nav) nav.classList.add('navigation__list--active');
+            if (overlay) overlay.classList.add('overlay--active');
+            document.body.classList.add('menu-open');
+        }
+
+        // Обработчик клика по кнопке гамбургер-меню
+        if (menuTrigger) {
+            menuTrigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+                if (isExpanded) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+        }
+
+        // Закрытие меню при клике на оверлей
+        if (overlay) {
+            overlay.addEventListener('click', closeMenu);
+        }
+
+        // Закрытие меню при клике на любую ссылку (для мобильных устройств)
+        allMenuLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 992) {
+                    closeMenu();
+                }
+            });
+        });
+
+        // Закрытие меню при изменении размера окна (при переходе на десктоп)
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 992) {
+                closeMenu();
+            }
+        });
+
+        // Обработчик для фиксированного хедера при скролле
+        function handleHeaderScroll() {
+            if (header) {
+                if (window.scrollY > 50) {
+                    header.classList.add('header--scrolled');
+                } else {
+                    header.classList.remove('header--scrolled');
+                }
+            }
+        }
+
+        // Инициализация выпадающих меню (для пользовательского меню)
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown__toggle');
+
+            if (toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropdown.classList.toggle('dropdown--show');
+                });
+            }
+        });
+
+        // Закрытие всех dropdown при клике в любом месте документа
+        document.addEventListener('click', function() {
+            dropdowns.forEach(dropdown => {
+                dropdown.classList.remove('dropdown--show');
+            });
+        });
+
+        // Инициализация при загрузке страницы
+        setActiveMenuBasedOnUrl();
+        handleHeaderScroll();
+        window.addEventListener('scroll', handleHeaderScroll);
+    });
+</script>

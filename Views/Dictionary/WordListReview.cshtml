@@ -1,0 +1,1315 @@
+﻿@* Страница для просмотра и редактирования слов, извлеченных из текста, перед добавлением в словарь *@
+@model EnglishLearningPlatform.ViewModels.CreateWordViewModel
+
+@{
+    ViewData["Title"] = "Просмотр извлеченных слов";
+}
+
+<!-- Хлебные крошки (навигационная цепочка) -->
+<div class="breadcrumb mb-4">
+    <a asp-action="Index" class="text-violet">Словарь</a>
+    <span class="mx-2">/</span>
+    <a asp-action="CreateWordsList" class="text-violet">Добавить список слов</a>
+    <span class="mx-2">/</span>
+    <span class="text-muted">Просмотр извлеченных слов</span>
+</div>
+
+<!-- Заголовок страницы -->
+<div class="create-word-header text-center mb-4">
+    <h1 class="create-word-title">Просмотр извлеченных слов</h1>
+    <p class="create-word-subtitle">Отредактируйте переводы перед добавлением в словарь</p>
+</div>
+
+<!-- Основной контейнер для формы -->
+<div class="create-word-container">
+    <form asp-action="SaveWordsList" method="post" id="wordListForm">
+        @Html.AntiForgeryToken()
+        <!-- Информационное сообщение -->
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i>
+            Найдено @(Model.ExtractedWords?.Count ?? 0) слов. Отредактируйте переводы и нажмите "Добавить все слова".
+        </div>
+
+        <!-- Чекбокс "Выбрать все" -->
+        <div class="form-check mb-4">
+            <input type="checkbox" id="selectAll" class="form-check-input" checked />
+            <label for="selectAll" class="form-check-label fw-bold">
+                Выбрать все слова
+            </label>
+        </div>
+
+        <!-- Контейнер для сетки карточек слов -->
+        <div class="words-grid-container mb-4">
+            @if (Model.ExtractedWords != null)
+            {
+                @for (int i = 0; i < Model.ExtractedWords.Count; i++)
+                {
+                    var word = Model.ExtractedWords[i];
+                    <!-- Карточка слова с классами, зависящими от того, существует ли слово в базе -->
+                    <div class="word-card-item @(word.ExistsInDatabase ? "existing-word" : "")" 
+                         data-index="@i" data-exists="@word.ExistsInDatabase.ToString().ToLower()">
+                        <div class="word-card">
+
+                            <!-- Чекбокс карточки -->
+                            <div class="word-select-checkbox">
+                                <input type="checkbox" 
+                                       class="word-checkbox form-check-input" 
+                                       name="selectedWordIndexes" 
+                                       value="@i" 
+                                       @(word.ExistsInDatabase ? "disabled" : "checked") />
+                            </div>
+
+                            <div class="card-body">
+                                <!-- Скрытые поля для хранения всех данных -->
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].Id" />
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].EnglishWord" class="english-word-input" data-index="@i" />
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].Translation" class="translation-input" data-index="@i" />
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].Transcription" class="transcription-input" data-index="@i" />
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].PartOfSpeech" class="part-of-speech-input" data-index="@i" />
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].Example" class="example-input" data-index="@i" />
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].ImageUrl" class="image-url-input" data-index="@i" />
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].DifficultyLevel" class="difficulty-input" data-index="@i" />
+                                <input type="hidden" asp-for="@Model.ExtractedWords[i].IsLearned" class="is-learned-input" data-index="@i" />
+
+                                <!-- Английское слово -->
+                                <div class="form-group mb-3">
+                                    <label class="form-label fw-bold">Английское слово:</label>
+                                    <p class="form-control-plaintext fw-semibold english-word-display" data-index="@i">
+                                        @word.EnglishWord
+                                    </p>
+                                </div>
+                            
+                                @* Если слова нет в базе - показываем поле для редактирования перевода и кнопку редактирования *@
+                                @if (!word.ExistsInDatabase)
+                                {
+                                    <div class="form-group">
+                                        <label class="form-label">Перевод:</label>
+                                        <input type="text" class="form-control word-translation" data-index="@i"
+                                               value="@word.Translation"
+                                               placeholder="Введите перевод"
+                                               onchange="updateTranslation(this, @i)" />
+                                    </div>
+                                
+                                    <div class="text-center mt-3">
+                                        <button type="button" class="card-button edit-word-btn orange-button"
+                                                data-index="@i"
+                                                onclick="openEditModal(@i, false)">
+                                            <i class="bi bi-pencil"></i> Редактировать слово
+                                        </button>
+                                    </div>
+                                }
+                                @* Иначе (слово - дубликат) *@
+                                else
+                                {
+                                    <!-- Выбор действия -->
+                                    <div class="form-group mt-3">
+                                        <label class="form-label fw-semibold">Действие:</label>
+                                        <select name="wordActions[@i]" class="form-control action-select" 
+                                                onchange="handleActionChange(this, @i)">
+                                            <option value="skip" selected>Пропустить</option>
+                                            <option value="replace">Заменить существующее</option>
+                                        </select>
+                                    </div>
+                                
+                                    <!-- Кнопка редактирования скрыта по умолчанию и показывается только при выборе действия -->
+                                    <div class="text-center mt-3 edit-button-container" style="display: none;">
+                                        <button type="button" class="card-button edit-word-btn orange-button"
+                                                data-index="@i"
+                                                onclick="handleEditButtonClick(@i)">
+                                            <i class="bi bi-pencil"></i> Редактировать слово
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <!-- Кнопки действий внизу страницы -->
+        <div class="form-actions">
+            <button type="submit" class="btn-create">
+                <i class="bi bi-plus-circle"></i> Добавить выбранные слова
+            </button>
+            <a asp-action="CreateWordsList" class="btn-cancel">
+                <i class="bi bi-arrow-left"></i> Назад к добавлению списка
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Модальное окно для полного редактирования -->
+<div class="modal fade" id="editWordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Заголовок модального окна -->
+            <div class="modal-header">
+                <h5 class="modal-title">Редактирование слова</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Тело модального окна с формой редактирования -->
+            <div class="modal-body">
+                <input type="hidden" id="modalIndex" />
+                <input type="hidden" id="modalIsExisting" />
+                <input type="hidden" id="modalAction" />
+                <!-- Поле для английского слова -->
+                <div class="form-group mb-3">
+                    <label class="form-label fw-bold">Английское слово:</label>
+                    <input type="text" id="modalEnglishWord" class="form-control" 
+                           placeholder="Введите английское слово" @(ViewBag.IsReplaceAction == true ? "readonly" : "") />
+                    <div id="englishWordError" class="text-danger" style="display: none;">
+                        Английское слово обязательно для заполнения
+                    </div>
+                </div>
+                <!-- Строка с переводом и транскрипцией -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Перевод:</label>
+                            <textarea id="modalTranslation" class="form-control" rows="2" 
+                                      placeholder="Введите перевод"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Транскрипция:</label>
+                            <input type="text" id="modalTranscription" class="form-control" 
+                                   placeholder="Например: /ˈæpl/">
+                        </div>
+                    </div>
+                </div>
+                <!-- Строка с частью речи и сложностью -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Часть речи:</label>
+                            <select id="modalPartOfSpeech" class="form-control">
+                                <option value="">Выберите часть речи</option>
+                                <option value="noun">Существительное</option>
+                                <option value="verb">Глагол</option>
+                                <option value="adjective">Прилагательное</option>
+                                <option value="adverb">Наречие</option>
+                                <option value="preposition">Предлог</option>
+                                <option value="conjunction">Союз</option>
+                                <option value="pronoun">Местоимение</option>
+                                <option value="interjection">Междометие</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Сложность:</label>
+                            <div class="difficulty-stars">
+                                <span class="star" data-value="1">☆</span>
+                                <span class="star" data-value="2">☆</span>
+                                <span class="star" data-value="3">☆</span>
+                                <span class="star" data-value="4">☆</span>
+                                <span class="star" data-value="5">☆</span>
+                            </div>
+                            <input type="hidden" id="modalDifficultyLevel" value="1">
+                        </div>
+                    </div>
+                </div>
+                <!-- Поле для примера использования -->
+                <div class="form-group mb-3">
+                    <label class="form-label">Пример использования:</label>
+                    <textarea id="modalExample" class="form-control" rows="3" 
+                              placeholder="Пример предложения с этим словом"></textarea>
+                </div>
+                <!-- Поле для изображения -->
+                <div class="form-group mb-3">
+                    <label class="form-label">Ссылка на изображение:</label>
+                    <input type="text" id="modalImageUrl" class="form-control" 
+                           placeholder="https://example.com/image.jpg">
+                    <!-- Контейнер для предпросмотра изображения -->
+                    <div class="image-preview-container mt-2">
+                        <img src="" class="image-preview" style="max-width: 100%; max-height: 200px; display: none;" 
+                             onerror="this.style.display='none'" alt="Предпросмотр изображения" />
+                    </div>
+                </div>
+                <!-- Чекбокс для отметки "выучено" -->
+                <div class="form-check mb-3">
+                    <input type="checkbox" id="modalIsLearned" class="form-check-input" />
+                    <label for="modalIsLearned" class="form-check-label">Отметить как выученное</label>
+                </div>
+            </div>
+            <!-- Футер модального окна с кнопками -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveModalChanges">Сохранить изменения</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Сетка для карточек слов */
+        .words-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        /* Карточка слова */
+        .word-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        /* Эффект при наведении на карточку */
+        .word-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(114, 106, 227, 0.15);
+        }
+        /* Стиль для слов-дубликатов (которые уже есть в базе) */
+        .existing-word {
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+        }
+            .existing-word .word-card {
+            background: linear-gradient(135deg, #fffaf0, #fff3cd);
+            }
+
+        /*
+        .duplicate-word {
+            border: 2px solid #dc3545;
+            border-radius: 15px;
+        }
+            .duplicate-word .word-card {
+                background: linear-gradient(135deg, #fff5f5, #ffeaea);
+            }
+        */
+        /* Позиционирование чекбокса выбора */
+        .word-select-checkbox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+        /* Стили для чекбокса */
+        .word-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        /* Отступ для содержимого карточки */
+        .card-body {
+            padding-top: 2rem;
+        }
+        /* Стили для оранжевой кнопки */
+        .orange-button {
+            background-color: #FF5F3D !important;
+            color: white !important;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        /* Эффект при наведении на оранжевую кнопку */
+        .orange-button:hover {
+            background-color: #e04e2d !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            color: white !important;
+        }
+        /* Стили для disabled выпадающего списка */
+        .action-select:disabled {
+            background-color: #f8f9fa;
+            opacity: 0.6;
+        }
+        /* Стили для предупреждающего alert */
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffc107);
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+        /* Стили для readonly полей ввода */
+        .form-control:read-only {
+            background-color: #f8f9fa !important;
+            cursor: not-allowed;
+        }
+    </style>
+}
+
+@section Scripts {
+    @**<script>
+        // Глобальные переменные для хранения состояния редактирования
+        let currentEditIndex = -1; // Индекс текущего редактируемого слова
+        let currentEditAction = ''; // Текущее действие (edit, replace)
+        let existingWordsData = {}; // Данные о словах, которые уже есть в базе
+        let isFormSubmitting = false; // Флаг для отслеживания, была ли отправлена форма
+        
+        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+        /** Функция обновления состояний чекбокса "Выбрать все"
+         *  Проверяет, все ли доступные чекбоксы выбраны
+         */
+        function updateSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const wordCheckboxes = document.querySelectorAll('.word-checkbox');
+            // Фильтруем только доступные чекбоксы
+            const enabledCheckboxes = Array.from(wordCheckboxes).filter(checkbox => !checkbox.disabled);
+            // Проверяем, все ли выбраны
+            const allChecked = enabledCheckboxes.length > 0 && enabledCheckboxes.every(checkbox => checkbox.checked);
+            // Проверяем, есть ли хотя бы один выбранный
+            const someChecked = enabledCheckboxes.some(checkbox => checkbox.checked);
+            
+            // Устанавливаем состояние чекбокса "Выбрать все"
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        }
+        
+        /** Функция инициализации звезд рейтинга сложности
+         * param {NodeList} stars - Коллекция элементов звездочек
+         * param {HTMLElement} difficultyInput - Поле ввода уровня сложности
+         */
+        function initializeStars(stars, difficultyInput) {
+            // Получаем текущее значение сложности (по умолчанию 1)
+            const currentValue = parseInt(difficultyInput.value) || 1;
+            // Проходим по всем звездочкам
+            stars.forEach((star, index) => {
+                // Заполненная звездочка для выбранного уровня
+                if (index < currentValue) {
+                    star.innerHTML = '★';
+                    star.classList.add('active');
+                } 
+                // Пустая звездочка для невыбранных уровней
+                else {
+                    star.innerHTML = '☆';
+                    star.classList.remove('active');
+                }
+            });
+        }
+        
+        /** Функция обновления скрытых полей формы
+         * param {number} index - Индекс слова в списке
+         * param {object} fields - Объект с новыми значениями полей
+         */
+        function updateHiddenFields(index, fields) {
+            // Обновляем все скрытые поля для указанного слова
+            document.querySelector(`.english-word-input[data-index="${index}"]`).value = fields.englishWord;
+            document.querySelector(`.translation-input[data-index="${index}"]`).value = fields.translation;
+            document.querySelector(`.transcription-input[data-index="${index}"]`).value = fields.transcription;
+            document.querySelector(`.part-of-speech-input[data-index="${index}"]`).value = fields.partOfSpeech;
+            document.querySelector(`.example-input[data-index="${index}"]`).value = fields.example;
+            document.querySelector(`.image-url-input[data-index="${index}"]`).value = fields.imageUrl;
+            document.querySelector(`.difficulty-input[data-index="${index}"]`).value = fields.difficultyLevel;
+            document.querySelector(`.is-learned-input[data-index="${index}"]`).value = fields.isLearned;
+        }
+
+        /** Функция обновления отображения данных на карточке слова
+         * param {number} index - Индекс слова в списке
+         * param {object} fields - Объект с новыми значениями полей
+         */
+        function updateCardDisplay(index, fields) {
+            // Находим элементы отображения на карточке
+            const englishWordDisplay = document.querySelector(`.english-word-display[data-index="${index}"]`);
+            const translationInput = document.querySelector(`.word-translation[data-index="${index}"]`);
+            
+            // Обновляем отображаемые значения
+            if (englishWordDisplay) englishWordDisplay.textContent = fields.englishWord;
+            if (translationInput) translationInput.value = fields.translation;
+        }
+
+        // ==================== ОСНОВНЫЕ ФУНКЦИИ ====================
+        /** Функция-обработчик изменения действия для слова-дубликата
+         * param {HTMLSelectElement} select - Выпадающий список с действиями
+         * param {number} index - Индекс слова в списке
+         */
+        function handleActionChange(select, index) {
+            const action = select.value; // Получаем выбранное действие
+            const checkbox = document.querySelector(`.word-checkbox[value="${index}"]`);
+            const card = document.querySelector(`.word-card-item[data-index="${index}"]`);
+            const editButtonContainer = card.querySelector('.edit-button-container');
+            const englishWord = document.querySelector(`.english-word-input[data-index="${index}"]`).value;
+            // Обработка действий
+            if (action === 'skip') {
+                // Пропустить слово - снимаем выбор, блокируем чекбокс и не показываем кнопку редактирования
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                if (editButtonContainer) editButtonContainer.style.display = 'none';
+            } 
+            else {
+                // Выбираем, разблокируем чекбокс и показываем кнопку редактирования
+                checkbox.checked = true;
+                checkbox.disabled = false;
+                if (editButtonContainer) editButtonContainer.style.display = 'block';
+                
+                // Если выбрано "Заменить" - загружаем данные существующего слова
+                if (action === 'replace') {
+                    const existingWordData = existingWordsData[englishWord.toLowerCase()];
+                    if (existingWordData) {
+                        // Заполняем поля данными из базы
+                        document.querySelector(`.translation-input[data-index="${index}"]`).value = existingWordData.translation || '';
+                        document.querySelector(`.transcription-input[data-index="${index}"]`).value = existingWordData.transcription || '';
+                        document.querySelector(`.part-of-speech-input[data-index="${index}"]`).value = existingWordData.partOfSpeech || '';
+                        document.querySelector(`.example-input[data-index="${index}"]`).value = existingWordData.example || '';
+                        document.querySelector(`.image-url-input[data-index="${index}"]`).value = existingWordData.imageUrl || '';
+                        document.querySelector(`.difficulty-input[data-index="${index}"]`).value = existingWordData.difficultyLevel || 1;
+                        document.querySelector(`.is-learned-input[data-index="${index}"]`).value = existingWordData.isLearned || false;
+                        
+                        // Обновляем поле перевода на карточке
+                        const translationInput = document.querySelector(`.word-translation[data-index="${index}"]`);
+                        if (translationInput) {
+                            translationInput.value = existingWordData.translation || '';
+                        }
+                    }
+                    // Открываем модальное окно для редактирования
+                    openEditModal(index, true, 'replace');
+                }
+            }
+            // Обновляем состояние чекбокса "Выбрать все"
+            updateSelectAllCheckbox();
+        }
+
+        /** Функция-обработчик клика по кнопке редактирования
+         * param {number} index - Индекс слова в списке
+         * param {string} action - Действие (edit, replace)
+         */
+        function handleEditButtonClick(index, action = null) {
+            // Получаем выбранное действие из выпадающего списка
+            const actionSelect = document.querySelector(`.action-select[name="wordActions[${index}]"]`);
+            const selectedAction = action || (actionSelect ? actionSelect.value : 'edit');
+            
+            // Если выбрано "Заменить" - загружаем данные существующего слова
+            if (selectedAction === 'replace') {
+                const englishWord = document.querySelector(`.english-word-input[data-index="${index}"]`).value;
+                const existingWordData = existingWordsData[englishWord.toLowerCase()];
+        
+                if (existingWordData) {
+                    // Заполняем поля данными из базы
+                    document.querySelector(`.translation-input[data-index="${index}"]`).value = existingWordData.translation || '';
+                    document.querySelector(`.transcription-input[data-index="${index}"]`).value = existingWordData.transcription || '';
+                    document.querySelector(`.part-of-speech-input[data-index="${index}"]`).value = existingWordData.partOfSpeech || '';
+                    document.querySelector(`.example-input[data-index="${index}"]`).value = existingWordData.example || '';
+                    document.querySelector(`.image-url-input[data-index="${index}"]`).value = existingWordData.imageUrl || '';
+                    document.querySelector(`.difficulty-input[data-index="${index}"]`).value = existingWordData.difficultyLevel || 1;
+                    document.querySelector(`.is-learned-input[data-index="${index}"]`).value = existingWordData.isLearned || false;
+                    
+                    // Обновляем поле перевода на карточке
+                    const translationInput = document.querySelector(`.word-translation[data-index="${index}"]`);
+                    if (translationInput) {
+                        translationInput.value = existingWordData.translation || '';
+                    }
+                }
+            }
+            // Открываем модальное окно для редактирования
+            openEditModal(index, true, selectedAction);
+        }
+
+        /** Функция открытия модального окно для редактирования слова
+         * param {number} index - Индекс слова в списке
+         * param {boolean} isExisting - Существует ли слово в базе
+         * param {string} action - Действие (edit, replace)*/
+        function openEditModal(index, isExisting, action = 'edit') {
+            // Сохраняем текущие параметры редактирования
+            currentEditIndex = index;
+            currentEditAction = action;
+            
+            // Получаем английское слово
+            const englishWordInput = document.querySelector(`.english-word-input[data-index="${index}"]`);
+            const englishWord = englishWordInput.value;
+            
+            // Собираем все данные о слове
+            const wordData = {
+                translation: document.querySelector(`.translation-input[data-index="${index}"]`).value,
+                transcription: document.querySelector(`.transcription-input[data-index="${index}"]`).value,
+                partOfSpeech: document.querySelector(`.part-of-speech-input[data-index="${index}"]`).value,
+                example: document.querySelector(`.example-input[data-index="${index}"]`).value,
+                imageUrl: document.querySelector(`.image-url-input[data-index="${index}"]`).value,
+                difficultyLevel: parseInt(document.querySelector(`.difficulty-input[data-index="${index}"]`).value) || 1,
+                isLearned: document.querySelector(`.is-learned-input[data-index="${index}"]`).value === 'true'
+            };
+
+            // Настройка поля английского слова в зависимости от действия
+            const modalEnglishWordInput = document.getElementById('modalEnglishWord');
+            if (action === 'replace') {
+                // Для действия "Заменить" делаем поле readonly
+                modalEnglishWordInput.readOnly = true;
+                modalEnglishWordInput.style.backgroundColor = '#f8f9fa';
+                modalEnglishWordInput.title = "Замена существующего слова - английское слово нельзя изменить";
+            } 
+            else {
+                // Для других действий разрешаем редактирование
+                modalEnglishWordInput.readOnly = false;
+                modalEnglishWordInput.style.backgroundColor = '';
+                modalEnglishWordInput.title = "";
+            }
+
+            // Заполняем поля модального окна данными слова
+            document.getElementById('modalIndex').value = index;
+            document.getElementById('modalIsExisting').value = isExisting;
+            document.getElementById('modalAction').value = action;
+            document.getElementById('modalEnglishWord').value = englishWord;
+            document.getElementById('modalTranslation').value = wordData.translation;
+            document.getElementById('modalTranscription').value = wordData.transcription;
+            document.getElementById('modalPartOfSpeech').value = wordData.partOfSpeech;
+            document.getElementById('modalExample').value = wordData.example;
+            document.getElementById('modalImageUrl').value = wordData.imageUrl;
+            document.getElementById('modalDifficultyLevel').value = wordData.difficultyLevel;
+            document.getElementById('modalIsLearned').checked = wordData.isLearned;
+
+            // Инициализируем звездочки сложности
+            const stars = document.querySelectorAll('#editWordModal .star');
+            if (stars.length > 0) {
+                initializeStars(stars, document.getElementById('modalDifficultyLevel'));
+            }
+
+            // Настраиваем предпросмотр изображения
+            const modalImagePreview = document.querySelector('#editWordModal .image-preview');
+            if (wordData.imageUrl) {
+                modalImagePreview.src = wordData.imageUrl;
+                modalImagePreview.style.display = 'block';
+            } 
+            else {
+                modalImagePreview.style.display = 'none';
+            }
+
+            // Скрываем сообщение об ошибке
+            document.getElementById('englishWordError').style.display = 'none';
+
+            // Правильно открываем модальное окно используя Bootstrap
+            const modalElement = document.getElementById('editWordModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+
+        /** Функция обновления перевода слова при изменении поля ввода
+         * param {HTMLInputElement} input - Поле ввода перевода
+         * param {number} index - Индекс слова в списке
+         */
+        function updateTranslation(input, index) {
+            const hiddenTranslation = document.querySelector(`.translation-input[data-index="${index}"]`);
+            if (hiddenTranslation) {
+                hiddenTranslation.value = input.value;
+            }
+        }
+
+        /** Функция обновления интерфейса после сохранения изменений
+         * param {number} index - Индекс слова в списке
+         * param {string} action - Выполненное действие
+         */
+        function updateUIAfterSave(index, action) {
+            const card = document.querySelector(`.word-card-item[data-index="${index}"]`);
+            const actionSelect = document.querySelector(`.action-select[name="wordActions[${index}]"]`);
+            const checkbox = document.querySelector(`.word-checkbox[value="${index}"]`);
+            const editButtonContainer = card.querySelector('.edit-button-container');
+            // Для действия "Заменить" настраиваем интерфейс соответствующим образом
+            if (action === 'replace') {
+                if (actionSelect) actionSelect.value = 'replace';
+                if (checkbox) {
+                    checkbox.disabled = false;
+                    checkbox.checked = true;
+                }
+                if (editButtonContainer) editButtonContainer.style.display = 'block';
+                card.classList.add('existing-word');
+            }
+            // Обновляем состояние чекбокса "Выбрать все"
+            updateSelectAllCheckbox();
+        }
+
+        /** Функция проверки дубликатов после сохранения изменений
+         * param {number} index - Индекс слова в списке
+         * param {string} englishWord - Английское слово
+         * returns {boolean} - Есть ли дубликат
+         */
+        function checkDuplicateAfterSave(index, englishWord) {
+            const card = document.querySelector(`.word-card-item[data-index="${index}"]`);
+            const actionSelect = document.querySelector(`.action-select[name="wordActions[${index}]"]`);
+            const currentAction = actionSelect ? actionSelect.value : '';
+
+            // Убираем все классы стилей
+            card.classList.remove('existing-word', 'duplicate-word');
+
+            // Если действие "Заменить" - помечаем как существующее слово
+            if (currentAction === 'replace') {
+                card.classList.add('existing-word');
+                return true;
+            }
+
+            // Проверяем дубликаты среди других слов в списке
+            let isDuplicate = false;
+            const allEnglishWords = document.querySelectorAll('.english-word-input');
+
+            allEnglishWords.forEach((input, i) => {
+                if (i !== index && 
+                    input.value.toLowerCase() === englishWord.toLowerCase() && 
+                    document.querySelector(`.word-checkbox[value="${i}"]`).checked) {
+                    isDuplicate = true;
+                }
+            });
+            
+            // Проверяем, есть ли слово в базе данных
+            if (existingWordsData[englishWord.toLowerCase()]) {
+                isDuplicate = true;
+                card.classList.add('existing-word');
+            }
+
+            // Если найден дубликат - добавляем соответствующий стиль
+            if (isDuplicate) {
+                card.classList.add('duplicate-word');
+                return true;
+            }
+
+            return false;
+        }
+
+        /** Функция показа уведомления о дубликате слова
+         * param {string} word - Английское слово
+         * param {string} action - Действие (replace или пустая строка)
+         */
+        function showDuplicateNotification(word, action = '') {
+            // Формируем сообщение в зависимости от действия
+            let message = action === 'replace' 
+                ? `Слово "${word}" будет заменено в словаре!`
+                : `Слово "${word}" уже существует в словаре или списке!`;
+
+            const notification = document.createElement('div');
+            notification.className = action === 'replace' 
+                ? 'alert alert-info alert-dismissible fade show' 
+                : 'alert alert-warning alert-dismissible fade show';
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.innerHTML = `
+                <i class="bi ${action === 'replace' ? 'bi-info-circle' : 'bi-exclamation-triangle'}"></i> 
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+            
+            // Автоматическое скрытие уведомления через 5 секунд
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
+        document.getElementById('saveModalChanges').addEventListener('click', async function() {
+            console.log('Save button clicked');
+            
+            if (currentEditIndex !== -1) {
+                console.log('Current edit index:', currentEditIndex);
+                
+                const index = currentEditIndex;
+                const englishWord = document.getElementById('modalEnglishWord').value.trim();
+                const action = document.getElementById('modalAction').value;
+    
+                if (!englishWord) {
+                    document.getElementById('englishWordError').style.display = 'block';
+                    document.getElementById('modalEnglishWord').focus();
+                    return;
+                }
+    
+                const fieldsToUpdate = {
+                    englishWord: englishWord,
+                    translation: document.getElementById('modalTranslation').value,
+                    transcription: document.getElementById('modalTranscription').value,
+                    partOfSpeech: document.getElementById('modalPartOfSpeech').value,
+                    example: document.getElementById('modalExample').value,
+                    imageUrl: document.getElementById('modalImageUrl').value,
+                    difficultyLevel: document.getElementById('modalDifficultyLevel').value,
+                    isLearned: document.getElementById('modalIsLearned').checked
+                };
+        
+                updateHiddenFields(index, fieldsToUpdate);
+                updateCardDisplay(index, fieldsToUpdate);
+                updateUIAfterSave(index, action);
+
+                const isDuplicate = checkDuplicateAfterSave(index, englishWord);
+                if (isDuplicate) {
+                    showDuplicateNotification(englishWord, action);
+                }
+
+                // ПРАВИЛЬНОЕ ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА
+                const modalElement = document.getElementById('editWordModal');
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                }
+                
+                updateSelectAllCheckbox();
+            } else {
+                console.log('No current edit index');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const existingWords = Array.from(document.querySelectorAll('.english-word-input'))
+                .map(input => input.value.trim().toLowerCase())
+                .filter(word => word !== '');
+    
+            if (existingWords.length > 0) {
+                fetch('/Dictionary/GetExistingWordsData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(existingWords)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    existingWordsData = data;
+                    document.querySelectorAll('.english-word-input').forEach((input, index) => {
+                        const word = input.value.trim().toLowerCase();
+                        if (existingWordsData[word]) {
+                            const card = document.querySelector(`.word-card-item[data-index="${index}"]`);
+                            card.classList.add('existing-word');
+                        }
+                    });
+                })
+                .catch(error => console.error('Ошибка загрузки данных слов:', error));
+            }
+
+            const modalStars = document.querySelectorAll('#editWordModal .star');
+            const modalDifficultyInput = document.getElementById('modalDifficultyLevel');
+
+            modalStars.forEach((star, index) => {
+                star.addEventListener('click', () => {
+                    modalDifficultyInput.value = index + 1;
+                    modalStars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.innerHTML = '★';
+                            s.classList.add('active');
+                        } else {
+                            s.innerHTML = '☆';
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            const modalImageUrlInput = document.getElementById('modalImageUrl');
+            const modalImagePreview = document.querySelector('#editWordModal .image-preview');
+
+            modalImageUrlInput.addEventListener('input', function() {
+                if (this.value) {
+                    modalImagePreview.src = this.value;
+                    modalImagePreview.style.display = 'block';
+                } else {
+                    modalImagePreview.style.display = 'none';
+                }
+            });
+
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const wordCheckboxes = document.querySelectorAll('.word-checkbox');
+
+            selectAllCheckbox.addEventListener('change', function() {
+                wordCheckboxes.forEach(checkbox => {
+                    if (!checkbox.disabled) {
+                        checkbox.checked = this.checked;
+                    }
+                });
+                updateSelectAllCheckbox();
+            });
+
+            wordCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectAllCheckbox);
+            });
+
+            updateSelectAllCheckbox();
+
+            document.querySelectorAll('.english-word-input').forEach((input, index) => {
+                checkDuplicateAfterSave(index, input.value);
+            });
+
+            // Обработчик отправки формы - устанавливаем флаг
+            document.getElementById('wordListForm').addEventListener('submit', function(e) {
+                const selectedCheckboxes = Array.from(wordCheckboxes).filter(checkbox => checkbox.checked);
+            
+                if (selectedCheckboxes.length === 0) {
+                    e.preventDefault();
+                    alert('Пожалуйста, выберите хотя бы одно слово для добавления.');
+                    return false;
+                }
+            
+                // Устанавливаем флаг, что форма отправляется
+                isFormSubmitting = true;
+            });
+        });
+
+        // Обработчик beforeunload - проверяем флаг
+        window.addEventListener('beforeunload', function(e) {
+            // Если форма отправляется - не показываем предупреждение
+            if (isFormSubmitting) {
+                return undefined;
+            }
+            
+            const hasUnsavedChanges = document.querySelectorAll('.word-checkbox:checked').length > 0;
+    
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'У вас есть несохраненные изменения. Вы уверены, что хотите уйти?';
+                return e.returnValue;
+            }
+        });
+
+        // Сбрасываем флаг при возвращении на страницу (на случай, если пользователь отменил отправку)
+        window.addEventListener('pageshow', function(e) {
+            if (e.persisted || performance.getEntriesByType('navigation')[0].type === 'back_forward') {
+                isFormSubmitting = false;
+            }
+        });
+    </script>
+    @**@
+    <script>
+    // Глобальные переменные
+    const state = {
+        currentEditIndex: -1,
+        currentEditAction: '',
+        existingWordsData: {},
+        isFormSubmitting: false
+    };
+
+    // Кэширование DOM элементов
+    const domCache = {
+        selectAllCheckbox: null,
+        wordCheckboxes: null,
+        modalElements: null,
+        wordListForm: null
+    };
+
+    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+    function updateSelectAllCheckbox() {
+        const enabledCheckboxes = Array.from(domCache.wordCheckboxes).filter(checkbox => !checkbox.disabled);
+        const allChecked = enabledCheckboxes.length > 0 && enabledCheckboxes.every(checkbox => checkbox.checked);
+        const someChecked = enabledCheckboxes.some(checkbox => checkbox.checked);
+    
+        domCache.selectAllCheckbox.checked = allChecked;
+        domCache.selectAllCheckbox.indeterminate = someChecked && !allChecked;
+    }
+
+    function initializeStars(stars, difficultyInput) {
+        const currentValue = parseInt(difficultyInput.value) || 1;
+        stars.forEach((star, index) => {
+            if (index < currentValue) {
+                star.innerHTML = '★';
+                star.classList.add('active');
+            } else {
+                star.innerHTML = '☆';
+                star.classList.remove('active');
+            }
+        });
+    }
+
+    function updateHiddenFields(index, fields) {
+        const fieldSelectors = {
+            englishWord: '.english-word-input',
+            translation: '.translation-input',
+            transcription: '.transcription-input',
+            partOfSpeech: '.part-of-speech-input',
+            example: '.example-input',
+            imageUrl: '.image-url-input',
+            difficultyLevel: '.difficulty-input',
+            isLearned: '.is-learned-input'
+        };
+
+        Object.entries(fields).forEach(([key, value]) => {
+            const selector = fieldSelectors[key];
+            if (selector) {
+                const element = document.querySelector(`${selector}[data-index="${index}"]`);
+                if (element) element.value = value;
+            }
+        });
+    }
+
+    function updateCardDisplay(index, fields) {
+        const englishWordDisplay = document.querySelector(`.english-word-display[data-index="${index}"]`);
+        const translationInput = document.querySelector(`.word-translation[data-index="${index}"]`);
+    
+        if (englishWordDisplay && fields.englishWord) englishWordDisplay.textContent = fields.englishWord;
+        if (translationInput && fields.translation) translationInput.value = fields.translation;
+    }
+
+    // ==================== ОСНОВНЫЕ ФУНКЦИИ ====================
+    function handleActionChange(select, index) {
+        const action = select.value;
+        const checkbox = document.querySelector(`.word-checkbox[value="${index}"]`);
+        const card = document.querySelector(`.word-card-item[data-index="${index}"]`);
+        const editButtonContainer = card?.querySelector('.edit-button-container');
+        const englishWord = document.querySelector(`.english-word-input[data-index="${index}"]`)?.value;
+
+        if (action === 'skip') {
+            checkbox.checked = false;
+            checkbox.disabled = true;
+            if (editButtonContainer) editButtonContainer.style.display = 'none';
+        } else {
+            checkbox.checked = true;
+            checkbox.disabled = false;
+            if (editButtonContainer) editButtonContainer.style.display = 'block';
+        
+            if (action === 'replace' && englishWord && state.existingWordsData[englishWord.toLowerCase()]) {
+                const existingWordData = state.existingWordsData[englishWord.toLowerCase()];
+                const fieldsToUpdate = {
+                    translation: existingWordData.translation || '',
+                    transcription: existingWordData.transcription || '',
+                    partOfSpeech: existingWordData.partOfSpeech || '',
+                    example: existingWordData.example || '',
+                    imageUrl: existingWordData.imageUrl || '',
+                    difficultyLevel: existingWordData.difficultyLevel || 1,
+                    isLearned: existingWordData.isLearned || false
+                };
+            
+                updateHiddenFields(index, fieldsToUpdate);
+            
+                const translationInput = document.querySelector(`.word-translation[data-index="${index}"]`);
+                if (translationInput) translationInput.value = fieldsToUpdate.translation;
+            }
+        }
+        updateSelectAllCheckbox();
+    }
+
+    function handleEditButtonClick(index, action = null) {
+        const actionSelect = document.querySelector(`.action-select[name="wordActions[${index}]"]`);
+        const selectedAction = action || (actionSelect ? actionSelect.value : 'edit');
+    
+        if (selectedAction === 'replace') {
+            const englishWord = document.querySelector(`.english-word-input[data-index="${index}"]`)?.value;
+            const existingWordData = state.existingWordsData[englishWord?.toLowerCase()];
+        
+            if (existingWordData) {
+                const fieldsToUpdate = {
+                    translation: existingWordData.translation || '',
+                    transcription: existingWordData.transcription || '',
+                    partOfSpeech: existingWordData.partOfSpeech || '',
+                    example: existingWordData.example || '',
+                    imageUrl: existingWordData.imageUrl || '',
+                    difficultyLevel: existingWordData.difficultyLevel || 1,
+                    isLearned: existingWordData.isLearned || false
+                };
+            
+                updateHiddenFields(index, fieldsToUpdate);
+            
+                const translationInput = document.querySelector(`.word-translation[data-index="${index}"]`);
+                if (translationInput) translationInput.value = fieldsToUpdate.translation;
+            }
+        }
+        openEditModal(index, true, selectedAction);
+    }
+
+    function openEditModal(index, isExisting, action = 'edit') {
+        state.currentEditIndex = index;
+        state.currentEditAction = action;
+    
+        const englishWordInput = document.querySelector(`.english-word-input[data-index="${index}"]`);
+        const englishWord = englishWordInput?.value || '';
+
+        const wordData = {
+            translation: document.querySelector(`.translation-input[data-index="${index}"]`)?.value || '',
+            transcription: document.querySelector(`.transcription-input[data-index="${index}"]`)?.value || '',
+            partOfSpeech: document.querySelector(`.part-of-speech-input[data-index="${index}"]`)?.value || '',
+            example: document.querySelector(`.example-input[data-index="${index}"]`)?.value || '',
+            imageUrl: document.querySelector(`.image-url-input[data-index="${index}"]`)?.value || '',
+            difficultyLevel: parseInt(document.querySelector(`.difficulty-input[data-index="${index}"]`)?.value) || 1,
+            isLearned: document.querySelector(`.is-learned-input[data-index="${index}"]`)?.value === 'true'
+        };
+
+        const modalEnglishWordInput = domCache.modalElements.englishWord;
+        if (action === 'replace') {
+            modalEnglishWordInput.readOnly = true;
+            modalEnglishWordInput.style.backgroundColor = '#f8f9fa';
+            modalEnglishWordInput.title = "Замена существующего слова - английское слово нельзя изменить";
+        } else {
+            modalEnglishWordInput.readOnly = false;
+            modalEnglishWordInput.style.backgroundColor = '';
+            modalEnglishWordInput.title = "";
+        }
+
+        domCache.modalElements.index.value = index;
+        domCache.modalElements.isExisting.value = isExisting;
+        domCache.modalElements.action.value = action;
+        domCache.modalElements.englishWord.value = englishWord;
+        domCache.modalElements.translation.value = wordData.translation;
+        domCache.modalElements.transcription.value = wordData.transcription;
+        domCache.modalElements.partOfSpeech.value = wordData.partOfSpeech;
+        domCache.modalElements.example.value = wordData.example;
+        domCache.modalElements.imageUrl.value = wordData.imageUrl;
+        domCache.modalElements.difficultyLevel.value = wordData.difficultyLevel;
+        domCache.modalElements.isLearned.checked = wordData.isLearned;
+
+        if (domCache.modalElements.stars.length > 0) {
+            initializeStars(domCache.modalElements.stars, domCache.modalElements.difficultyLevel);
+        }
+
+        if (wordData.imageUrl) {
+            domCache.modalElements.imagePreview.src = wordData.imageUrl;
+            domCache.modalElements.imagePreview.style.display = 'block';
+        } else {
+            domCache.modalElements.imagePreview.style.display = 'none';
+        }
+
+        domCache.modalElements.englishWordError.style.display = 'none';
+
+        const modal = new bootstrap.Modal(domCache.modalElements.container);
+        modal.show();
+    }
+
+    function updateTranslation(input, index) {
+        const hiddenTranslation = document.querySelector(`.translation-input[data-index="${index}"]`);
+        if (hiddenTranslation) hiddenTranslation.value = input.value;
+    }
+
+    function updateUIAfterSave(index, action) {
+        const card = document.querySelector(`.word-card-item[data-index="${index}"]`);
+        const actionSelect = document.querySelector(`.action-select[name="wordActions[${index}]"]`);
+        const checkbox = document.querySelector(`.word-checkbox[value="${index}"]`);
+        const editButtonContainer = card?.querySelector('.edit-button-container');
+    
+        if (action === 'replace') {
+            if (actionSelect) actionSelect.value = 'replace';
+            if (checkbox) {
+                checkbox.disabled = false;
+                checkbox.checked = true;
+            }
+            if (editButtonContainer) editButtonContainer.style.display = 'block';
+            card.classList.add('existing-word');
+        }
+        updateSelectAllCheckbox();
+    }
+
+    function checkDuplicateAfterSave(index, englishWord) {
+        const card = document.querySelector(`.word-card-item[data-index="${index}"]`);
+        const actionSelect = document.querySelector(`.action-select[name="wordActions[${index}]"]`);
+        const currentAction = actionSelect ? actionSelect.value : '';
+
+        card.classList.remove('existing-word', 'duplicate-word');
+
+        if (currentAction === 'replace') {
+            card.classList.add('existing-word');
+            return true;
+        }
+
+        let isDuplicate = false;
+        const allEnglishWords = document.querySelectorAll('.english-word-input');
+
+        allEnglishWords.forEach((input, i) => {
+            if (i !== index && 
+                input.value.toLowerCase() === englishWord.toLowerCase() && 
+                document.querySelector(`.word-checkbox[value="${i}"]`).checked) {
+                isDuplicate = true;
+            }
+        });
+    
+        if (state.existingWordsData[englishWord.toLowerCase()]) {
+            isDuplicate = true;
+            card.classList.add('existing-word');
+        }
+
+        if (isDuplicate) {
+            card.classList.add('duplicate-word');
+            return true;
+        }
+
+        return false;
+    }
+
+    function showDuplicateNotification(word, action = '') {
+        const message = action === 'replace' 
+            ? `Слово "${word}" будет заменено в словаре!`
+            : `Слово "${word}" уже существует в словаре или списке!`;
+
+        const notification = document.createElement('div');
+        notification.className = action === 'replace' 
+            ? 'alert alert-info alert-dismissible fade show' 
+            : 'alert alert-warning alert-dismissible fade show';
+        notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            <i class="bi ${action === 'replace' ? 'bi-info-circle' : 'bi-exclamation-triangle'}"></i> 
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(notification);
+    
+        setTimeout(() => {
+            if (notification.parentNode) notification.remove();
+        }, 5000);
+    }
+
+    // ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
+    function initEventListeners() {
+        // Сохранение изменений в модальном окне
+        domCache.modalElements.saveButton.addEventListener('click', function() {
+            if (state.currentEditIndex !== -1) {
+                const index = state.currentEditIndex;
+                const englishWord = domCache.modalElements.englishWord.value.trim();
+                const action = domCache.modalElements.action.value;
+
+                if (!englishWord) {
+                    domCache.modalElements.englishWordError.style.display = 'block';
+                    domCache.modalElements.englishWord.focus();
+                    return;
+                }
+
+                const fieldsToUpdate = {
+                    englishWord: englishWord,
+                    translation: domCache.modalElements.translation.value,
+                    transcription: domCache.modalElements.transcription.value,
+                    partOfSpeech: domCache.modalElements.partOfSpeech.value,
+                    example: domCache.modalElements.example.value,
+                    imageUrl: domCache.modalElements.imageUrl.value,
+                    difficultyLevel: domCache.modalElements.difficultyLevel.value,
+                    isLearned: domCache.modalElements.isLearned.checked
+                };
+    
+                updateHiddenFields(index, fieldsToUpdate);
+                updateCardDisplay(index, fieldsToUpdate);
+                updateUIAfterSave(index, action);
+
+                const isDuplicate = checkDuplicateAfterSave(index, englishWord);
+                if (isDuplicate) showDuplicateNotification(englishWord, action);
+
+                const modal = bootstrap.Modal.getInstance(domCache.modalElements.container);
+                if (modal) modal.hide();
+            
+                updateSelectAllCheckbox();
+            }
+        });
+
+        // Звездочки сложности
+        domCache.modalElements.stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                domCache.modalElements.difficultyLevel.value = index + 1;
+                domCache.modalElements.stars.forEach((s, i) => {
+                    if (i <= index) {
+                        s.innerHTML = '★';
+                        s.classList.add('active');
+                    } else {
+                        s.innerHTML = '☆';
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // Предпросмотр изображения
+        domCache.modalElements.imageUrl.addEventListener('input', function() {
+            if (this.value) {
+                domCache.modalElements.imagePreview.src = this.value;
+                domCache.modalElements.imagePreview.style.display = 'block';
+            } else {
+                domCache.modalElements.imagePreview.style.display = 'none';
+            }
+        });
+
+        // Выбрать все слова
+        domCache.selectAllCheckbox.addEventListener('change', function() {
+            domCache.wordCheckboxes.forEach(checkbox => {
+                if (!checkbox.disabled) checkbox.checked = this.checked;
+            });
+            updateSelectAllCheckbox();
+        });
+
+        // Отправка формы
+        domCache.wordListForm.addEventListener('submit', function(e) {
+            const selectedCheckboxes = Array.from(domCache.wordCheckboxes).filter(checkbox => checkbox.checked);
+    
+            if (selectedCheckboxes.length === 0) {
+                e.preventDefault();
+                alert('Пожалуйста, выберите хотя бы одно слово для добавления.');
+                return false;
+            }
+    
+            state.isFormSubmitting = true;
+        });
+
+        // Предупреждение о несохраненных изменениях
+        window.addEventListener('beforeunload', function(e) {
+            if (state.isFormSubmitting) return undefined;
+        
+            const hasUnsavedChanges = document.querySelectorAll('.word-checkbox:checked').length > 0;
+
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'У вас есть несохраненные изменения. Вы уверены, что хотите уйти?';
+                return e.returnValue;
+            }
+        });
+
+        // Сброс флага отправки формы
+        window.addEventListener('pageshow', function(e) {
+            if (e.persisted || performance.getEntriesByType('navigation')[0].type === 'back_forward') {
+                state.isFormSubmitting = false;
+            }
+        });
+    }
+
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Кэширование DOM элементов
+        domCache.selectAllCheckbox = document.getElementById('selectAll');
+        domCache.wordCheckboxes = document.querySelectorAll('.word-checkbox');
+        domCache.wordListForm = document.getElementById('wordListForm');
+    
+        // Кэширование элементов модального окна
+        domCache.modalElements = {
+            container: document.getElementById('editWordModal'),
+            index: document.getElementById('modalIndex'),
+            isExisting: document.getElementById('modalIsExisting'),
+            action: document.getElementById('modalAction'),
+            englishWord: document.getElementById('modalEnglishWord'),
+            translation: document.getElementById('modalTranslation'),
+            transcription: document.getElementById('modalTranscription'),
+            partOfSpeech: document.getElementById('modalPartOfSpeech'),
+            example: document.getElementById('modalExample'),
+            imageUrl: document.getElementById('modalImageUrl'),
+            difficultyLevel: document.getElementById('modalDifficultyLevel'),
+            isLearned: document.getElementById('modalIsLearned'),
+            englishWordError: document.getElementById('englishWordError'),
+            saveButton: document.getElementById('saveModalChanges'),
+            stars: document.querySelectorAll('#editWordModal .star'),
+            imagePreview: document.querySelector('#editWordModal .image-preview')
+        };
+
+        // Загрузка данных существующих слов
+        const existingWords = Array.from(document.querySelectorAll('.english-word-input'))
+            .map(input => input.value.trim().toLowerCase())
+            .filter(word => word !== '');
+
+        if (existingWords.length > 0) {
+            fetch('/Dictionary/GetExistingWordsData', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(existingWords)
+            })
+            .then(response => response.json())
+            .then(data => {
+                state.existingWordsData = data;
+                document.querySelectorAll('.english-word-input').forEach((input, index) => {
+                    const word = input.value.trim().toLowerCase();
+                    if (state.existingWordsData[word]) {
+                        const card = document.querySelector(`.word-card-item[data-index="${index}"]`);
+                        card.classList.add('existing-word');
+                    }
+                });
+            })
+            .catch(error => console.error('Ошибка загрузки данных слов:', error));
+        }
+
+        // Инициализация обработчиков событий
+        initEventListeners();
+
+        // Инициализация чекбоксов
+        domCache.wordCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectAllCheckbox);
+        });
+
+        updateSelectAllCheckbox();
+
+        // Проверка дубликатов при загрузке
+        document.querySelectorAll('.english-word-input').forEach((input, index) => {
+            checkDuplicateAfterSave(index, input.value);
+        });
+    });
+    </script>
+}

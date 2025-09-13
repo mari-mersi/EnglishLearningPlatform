@@ -1,0 +1,540 @@
+﻿﻿@using EnglishLearningPlatform.ViewModels;
+@model EnglishLearningPlatform.ViewModels.StatisticsViewModel
+@{
+    ViewData["Title"] = "Статистика изучения";
+    Layout = "_Layout";
+
+    // Генерируем данные активности здесь, так как они не передаются через модель
+    var activityData = new List<ActivityDay>();
+    var random = new Random();
+    var today = DateTime.Today;
+
+    for (int i = 29; i >= 0; i--)
+    {
+        var date = today.AddDays(-i);
+        var isActive = random.Next(0, 3) > 0;
+        var wordCount = isActive ? random.Next(5, 21) : 0;
+
+        activityData.Add(new ActivityDay
+        {
+            Date = date,
+            WordCount = wordCount,
+            IsActive = isActive
+        });
+    }
+}
+
+<div class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-heading text-center">
+                    <h4>Статистика изучения</h4>
+                    <div class="line-dec"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Общая статистика -->
+        <div class="row mb-5">
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="skill-item text-center">
+                    <div class="progress-circle">
+                        <div class="progress-circle-value">
+                            <div class="progress-text">@Model.ProgressPercentage%</div>
+                        </div>
+                    </div>
+                    <h4>Общий прогресс</h4>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="skill-item text-center">
+                    <div class="progress-circle">
+                        <div class="progress-circle-value">
+                            <div class="progress-text">@Model.LearnedWords</div>
+                        </div>
+                    </div>
+                    <h4>Изученные слова</h4>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="skill-item text-center">
+                    <div class="progress-circle">
+                        <div class="progress-circle-value">
+                            <div class="progress-text">@Model.TotalWords</div>
+                        </div>
+                    </div>
+                    <h4>Всего слов</h4>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="skill-item text-center">
+                    <div class="progress-circle">
+                        <div class="progress-circle-value">
+                            <div class="progress-text">@Model.StreakDays</div>
+                        </div>
+                    </div>
+                    <h4>Дней подряд</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Графики и детальная статистика -->
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="portfolio-item">
+                    <div class="down-content p-4">
+                        <h4 class="text-center mb-4">Прогресс изучения по дням</h4>
+                        <div class="chart-container" style="position: relative; height:300px;">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="portfolio-item">
+                    <div class="down-content p-4">
+                        <h4 class="text-center mb-4">Распределение по уровням</h4>
+                        <div class="chart-container" style="position: relative; height:300px;">
+                            <canvas id="levelChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ежедневная активность -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="portfolio-item">
+                    <div class="down-content p-4">
+                        <h4 class="text-center mb-4">Ежедневная активность</h4>
+
+                        <!-- Заголовки дней недели -->
+                        <div class="calendar-weekdays mb-2">
+                            <div class="weekday">Пн</div>
+                            <div class="weekday">Вт</div>
+                            <div class="weekday">Ср</div>
+                            <div class="weekday">Чт</div>
+                            <div class="weekday">Пт</div>
+                            <div class="weekday">Сб</div>
+                            <div class="weekday">Вс</div>
+                        </div>
+
+                        <div class="activity-calendar">
+                            <div class="calendar-grid">
+                                <!-- Пустые ячейки для выравнивания первого дня -->
+                                @{
+                                    var firstDay = activityData.FirstOrDefault()?.Date.DayOfWeek;
+                                    var emptyCells = firstDay.HasValue ? ((int)firstDay.Value + 6) % 7 : 0;
+
+                                    for (int i = 0; i < emptyCells; i++) {
+                                        <div class="calendar-day empty"></div>
+                                    }
+                                }
+
+                                @foreach (var day in activityData) {
+                                    <div class="calendar-day @(day.IsActive ? "active" : "") @(day.Date.DayOfWeek == DayOfWeek.Sunday ? "sunday" : "")"
+                                         data-toggle="tooltip"
+                                         title="@day.Date.ToString("dd.MM.yyyy") - @day.WordCount слов">
+                                        @if (day.IsActive) {
+                                            <span>@day.WordCount</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Легенда -->
+                        <div class="calendar-legend mt-3 text-center">
+                            <div class="legend-item d-inline-block mx-2">
+                                <div class="legend-color empty d-inline-block mr-1"></div>
+                                <small>Нет данных</small>
+                            </div>
+                            <div class="legend-item d-inline-block mx-2">
+                                <div class="legend-color inactive d-inline-block mr-1"></div>
+                                <small>Неактивно</small>
+                            </div>
+                            <div class="legend-item d-inline-block mx-2">
+                                <div class="legend-color active d-inline-block mr-1"></div>
+                                <small>Активно</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Достижения -->
+        <div class="row mt-5">
+            <div class="col-lg-12">
+                <div class="section-heading text-center">
+                    <h4>Достижения</h4>
+                    <div class="line-dec"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="achievement-item text-center">
+                    <div class="icon mb-3">
+                        <img src="~/images/cat-first-words.png" alt="Первые слова" style="max-width: 80px;">
+                    </div>
+                    <h5>Первые слова</h5>
+                    <p>Изучено первых 10 слов</p>
+                    <span class="badge @(Model.LearnedWords >= 10 ? "badge-success" : "badge-secondary")">
+                        @(Model.LearnedWords >= 10 ? "Получено" : "В процессе")
+                    </span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="achievement-item text-center">
+                    <div class="icon mb-3">
+                        <img src="~/images/cat-week-of-training.png" alt="Неделя обучения" style="max-width: 80px;">
+                    </div>
+                    <h5>Неделя обучения</h5>
+                    <p>7 дней подряд с занятиями</p>
+                    <span class="badge @(Model.StreakDays >= 7 ? "badge-success" : "badge-secondary")">
+                        @(Model.StreakDays >= 7 ? "Получено" : "В процессе")
+                    </span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="achievement-item text-center">
+                    <div class="icon mb-3">
+                        <img src="~/images/cat-vocabulary.png" alt="Словарный запас" style="max-width: 80px;">
+                    </div>
+                    <h5>Словарный запас</h5>
+                    <p>50 изученных слов</p>
+                    <span class="badge @(Model.LearnedWords >= 50 ? "badge-success" : "badge-secondary")">
+                        @(Model.LearnedWords >= 50 ? "Получено" : "В процессе")
+                    </span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="achievement-item text-center">
+                    <div class="icon mb-3">
+                        <img src="~/images/cat-month-of-training.png" alt="Месяц обучения" style="max-width: 80px;">
+                    </div>
+                    <h5>Месяц обучения</h5>
+                    <p>30 дней подряд с занятиями</p>
+                    <span class="badge @(Model.StreakDays >= 30 ? "badge-success" : "badge-secondary")">
+                        @(Model.StreakDays >= 30 ? "Получено" : "В процессе")
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Подключение Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Анимация появления элементов статистики
+            animateSkillItems();
+            initCharts();
+        });
+
+        function animateSkillItems() {
+            const skillItems = document.querySelectorAll('.skill-item');
+            skillItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('show');
+                }, index * 200);
+            });
+        }
+
+        function initCharts() {
+            // Проверяем, загрузился ли Chart.js
+            if (typeof Chart === 'undefined') {
+                showChartsFallback();
+                return;
+            }
+
+            try {
+                createProgressChart();
+                createLevelChart();
+            } catch (error) {
+                console.error('Ошибка при создании графиков:', error);
+                showChartsFallback();
+            }
+            
+            initTooltips();
+        }
+
+        function createProgressChart() {
+            const ctx = document.getElementById('progressChart');
+            if (!ctx) return;
+            
+            new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                    datasets: [{
+                        label: 'Слова изучено',
+                        data: [12, 19, 3, 5, 2, 3, 15],
+                        borderColor: '#EF3996',
+                        backgroundColor: 'rgba(239, 57, 150, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function createLevelChart() {
+            const ctx = document.getElementById('levelChart');
+            if (!ctx) return;
+            
+            new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Начальный', 'Средний', 'Продвинутый'],
+                    datasets: [{
+                        data: [30, 45, 25],
+                        backgroundColor: ['#EF3996', '#726ae3', '#FF876D']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function showChartsFallback() {
+            const progressChart = document.getElementById('progressChart');
+            const levelChart = document.getElementById('levelChart');
+            
+            if (progressChart) {
+                progressChart.innerHTML = 
+                    '<div class="text-center p-5 text-muted"><i class="bi bi-bar-chart" style="font-size: 3rem;"></i><p>График временно недоступен</p></div>';
+            }
+            
+            if (levelChart) {
+                levelChart.innerHTML = 
+                    '<div class="text-center p-5 text-muted"><i class="bi bi-pie-chart" style="font-size: 3rem;"></i><p>График временно недоступен</p></div>';
+            }
+        }
+
+        function initTooltips() {
+            const calendarDays = document.querySelectorAll('.calendar-day[data-toggle="tooltip"]');
+            let activeTooltip = null;
+
+            calendarDays.forEach(day => {
+                day.addEventListener('mouseenter', function(e) {
+                    if (activeTooltip) {
+                        document.body.removeChild(activeTooltip);
+                    }
+
+                    const title = this.getAttribute('title');
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'custom-tooltip';
+                    tooltip.textContent = title;
+                    tooltip.style.position = 'fixed';
+                    tooltip.style.background = 'rgba(0,0,0,0.9)';
+                    tooltip.style.color = 'white';
+                    tooltip.style.padding = '8px 12px';
+                    tooltip.style.borderRadius = '6px';
+                    tooltip.style.zIndex = '10000';
+                    tooltip.style.fontSize = '12px';
+                    tooltip.style.pointerEvents = 'none';
+                    
+                    document.body.appendChild(tooltip);
+                    activeTooltip = tooltip;
+
+                    // Позиционирование tooltip
+                    const rect = this.getBoundingClientRect();
+                    tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+                    tooltip.style.left = (rect.left + rect.width/2 - tooltip.offsetWidth/2) + 'px';
+                });
+                
+                day.addEventListener('mouseleave', function() {
+                    if (activeTooltip) {
+                        document.body.removeChild(activeTooltip);
+                        activeTooltip = null;
+                    }
+                });
+            });
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .progress-circle {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            background: #f8f9fa;
+            border: 3px solid #e9ecef;
+            border-radius: 50%;
+        }
+
+        .progress-circle-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 2;
+            border: 2px solid #e9ecef;
+        }
+
+        .progress-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50 !important;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+            border: 1px dashed #ddd;
+        }
+
+        .calendar-day:not(.empty) {
+            background: #ecf0f1;
+        }
+
+        .calendar-day.active {
+            background: #EF3996;
+            color: white;
+        }
+
+        .calendar-day.sunday:not(.empty) {
+            background: #ffeaa7;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .weekday {
+            padding: 5px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend-color.empty {
+            background: transparent;
+            border: 1px dashed #ddd;
+        }
+
+        .legend-color.inactive {
+            background: #ecf0f1;
+        }
+
+        .legend-color.active {
+            background: #EF3996;
+        }
+
+        /* Анимация появления элементов */
+        .skill-item {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .skill-item.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .achievement-item {
+            padding: 20px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .achievement-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .custom-tooltip {
+            position: fixed;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            z-index: 10000;
+            font-size: 12px;
+            pointer-events: none;
+            max-width: 200px;
+            text-align: center;
+        }
+    </style>
+}

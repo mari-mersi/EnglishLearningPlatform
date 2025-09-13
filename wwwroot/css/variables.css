@@ -1,0 +1,397 @@
+﻿/*=============================================================
+    Стили переменных
+===============================================================
+***************************************************************
+Содержание:
+  1. Переменные
+    1.1 Цветовая палитра (Raw colors)
+    1.2 Семантические переменные (Semantic tokens)
+    1.3 Типографика
+    1.4 Z-index слои
+    1.5 Размеры и отступы
+    1.6 Границы и скругления
+    1.7 Анимации и переходы
+    1.8 Прочее
+  2. Дополнительные темы
+    2.1 Темная тема
+    2.2 Тема высокой контрастности
+    2.3 Уменьшенное движение (Reduced motion)
+**************************************************************/
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                1. ПЕРЕМЕННЫЕ                            ║
+  ╚═════════════════════════════════════════════════════════╝*/
+
+/* ═════════ 1.1. Цветовая палитра (Raw colors) ════════════ */
+:root {
+    /* ────────────── Розовая гамма ──────────────────────── */
+    --color-pink-50: #fdf2f8;
+    --color-pink-100: #fce7f3;
+    --color-pink-200: #fbcfe8;
+    --color-pink-300: #f9a8d4;
+    --color-pink-400: #f472b6;
+    --color-pink-500: #ef3996;
+    --color-pink-600: #db2777;
+    --color-pink-700: #b34d81;
+    --color-pink-800: #9d174d;
+    --color-pink-900: #9b1358;
+    /* ────────────── Оранжевая гамма ────────────────────── */
+    --color-orange-50: #fff7ed;
+    --color-orange-100: #ffedd5;
+    --color-orange-200: #fed7aa;
+    --color-orange-300: #fdba74;
+    --color-orange-400: #fb923c;
+    --color-orange-500: #ff5f3d;
+    --color-orange-600: #ea580c;
+    --color-orange-700: #bf6552;
+    --color-orange-800: #9a3412;
+    --color-orange-900: #a62d14;
+    /* ────────────── Фиолетовая гамма ───────────────────── */
+    --color-violet-50: #faf5ff;
+    --color-violet-100: #f3e8ff;
+    --color-violet-200: #e9d5ff;
+    --color-violet-300: #d8b4fe;
+    --color-violet-400: #c084fc;
+    --color-violet-500: #a340e1;
+    --color-violet-600: #9333ea;
+    --color-violet-700: #864ea9;
+    --color-violet-800: #6b21a8;
+    --color-violet-900: #621592;
+    /* ────────────── Черно-белая гамма ──────────────────── */
+    --color-gray-50: #ffffff;
+    --color-gray-100: #f8fafc;
+    --color-gray-200: #f1f5f9;
+    --color-gray-300: #e2e8f0;
+    --color-gray-400: #cbd5e1;
+    --color-gray-500: #64748b;
+    --color-gray-600: #475569;
+    --color-gray-700: #334155;
+    --color-gray-800: #1e293b;
+    --color-gray-900: #0f172a;
+    --color-gray-950: #020617;
+    /* ────────────── Акцентные цвета ────────────────────── */
+    --color-green-50: #f0fdf4;
+    --color-green-100: #dcfce7;
+    --color-green-200: #bbf7d0;
+    --color-green-300: #86efac;
+    --color-green-400: #4ade80;
+    --color-green-500: #22c55e;
+    --color-green-600: #16a34a;
+    --color-green-700: #15803d;
+    --color-green-800: #166534;
+    --color-green-900: #14532d;
+    --color-yellow-50: #fefce8;
+    --color-yellow-100: #fef9c3;
+    --color-yellow-200: #fef08a;
+    --color-yellow-300: #fde047;
+    --color-yellow-400: #facc15;
+    --color-yellow-500: #eab308;
+    --color-yellow-600: #ca8a04;
+    --color-yellow-700: #a16207;
+    --color-yellow-800: #854d0e;
+    --color-yellow-900: #713f12;
+    --color-red-50: #fef2f2;
+    --color-red-100: #fee2e2;
+    --color-red-200: #fecaca;
+    --color-red-300: #fca5a5;
+    --color-red-400: #f87171;
+    --color-red-500: #ef4444;
+    --color-red-600: #dc2626;
+    --color-red-700: #b91c1c;
+    --color-red-800: #991b1b;
+    --color-red-900: #7f1d1d;
+    --color-blue-50: #eff6ff;
+    --color-blue-100: #dbeafe;
+    --color-blue-200: #bfdbfe;
+    --color-blue-300: #93c5fd;
+    --color-blue-400: #60a5fa;
+    --color-blue-500: #3b82f6;
+    --color-blue-600: #2563eb;
+    --color-blue-700: #1d4ed8;
+    --color-blue-800: #1e40af;
+    --color-blue-900: #1e3a8a;
+    /* ────────────── Цвета индиго ───────────────────────── */
+    --color-indigo-500: #6366f1;
+    --color-indigo-600: #4f46e5;
+}
+
+/* ═════════ 1.2. Семантические переменные ═════════════════ */
+:root {
+    /* ────────────── Градиенты ──────────────────────────── */
+    --gradient-primary: linear-gradient(135deg, var(--color-violet-500), var(--color-violet-700));
+    --gradient-danger: linear-gradient(135deg, var(--color-orange-500), var(--color-orange-700));
+    --gradient-success: linear-gradient(135deg, var(--color-green-500), var(--color-green-700));
+    /* ────────────── Прозрачные версии ──────────────────── */
+    --color-pink-500-10: rgba(239, 57, 150, 0.1);
+    --color-violet-500-10: rgba(163, 64, 225, 0.1);
+    --color-orange-500-10: rgba(255, 95, 61, 0.1);
+    /* ────────────── Фон ────────────────────────────────── */
+    --color-bg-primary: var(--color-gray-50);
+    --color-bg-secondary: var(--color-gray-100);
+    --color-bg-tertiary: var(--color-gray-200);
+    --color-bg-dark: var(--color-gray-950);
+    --color-bg-accent: var(--color-pink-500);
+    --color-bg-overlay: rgba(0, 0, 0, 0.5);
+    --color-bg-backdrop: rgba(0, 0, 0, 0.1);
+    /* ────────────── Текст ──────────────────────────────── */
+    --color-text-primary: var(--color-gray-900);
+    --color-text-secondary: var(--color-gray-600);
+    --color-text-tertiary: var(--color-gray-500);
+    --color-text-on-accent: var(--color-gray-50);
+    --color-text-accent: var(--color-pink-500);
+    --color-text-muted: var(--color-gray-400);
+    --color-text-inverse: var(--color-gray-50);
+    /* ────────────── Состояния интерактивных элементов ──── */
+    --color-accent-primary: var(--color-pink-500);
+    --color-accent-hover: var(--color-pink-600);
+    --color-accent-active: var(--color-pink-700);
+    --color-accent-disabled: var(--color-gray-400);
+    --color-button-primary-bg: var(--color-pink-500);
+    --color-button-primary-hover: var(--color-pink-600);
+    --color-button-primary-active: var(--color-pink-700);
+    --color-button-primary-text: var(--color-gray-50);
+    --color-button-secondary-bg: transparent;
+    --color-button-secondary-hover: var(--color-gray-100);
+    --color-button-secondary-active: var(--color-gray-200);
+    --color-button-secondary-text: var(--color-gray-700);
+    /* ────────────── Системные статусы ──────────────────── */
+    --color-status-success: var(--color-green-500);
+    --color-status-warning: var(--color-yellow-500);
+    --color-status-error: var(--color-red-500);
+    --color-status-info: var(--color-blue-500);
+    /* ────────────── Фон системных статусов ─────────────── */
+    --color-status-success-bg: var(--color-green-50);
+    --color-status-warning-bg: var(--color-yellow-50);
+    --color-status-error-bg: var(--color-red-50);
+    --color-status-info-bg: var(--color-blue-50);
+    /* ────────────── Состояния для статусных цветов ─────── */
+    --color-status-success-hover: rgba(34, 197, 94, 0.9);
+    --color-status-warning-hover: rgba(255, 154, 44, 0.9);
+    --color-status-error-hover: rgba(255, 81, 44, 0.9);
+    --color-status-info-hover: rgba(36, 138, 176, 0.9);
+}
+
+/* ═════════ 1.3. Типографика ══════════════════════════════ */
+:root {
+    --font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-family-heading: var(--font-family-base);
+    --font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    --letter-spacing-tight: -0.025em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.025em;
+}
+
+/* ═════════ 1.4. Z-index слои ═════════════════════════════ */
+:root {
+    --z-index-hidden: -1;
+    --z-index-base: 0;
+    --z-index-banner: 5;
+    --z-index-footer: 5;
+    --z-index-section: 10;
+    --z-index-cards: 15;
+    --z-index-badge: 16;
+    --z-index-interactive: 20;
+    --z-index-scroll: 100;
+    --z-index-overlay: 900;
+    --z-index-menu: 800;
+    --z-index-header: 1000;
+    --z-index-menu-burger: 1001;
+    --z-index-modal: 1050;
+    --z-index-tooltip: 1100;
+    --z-index-toast: 1200;
+}
+
+/* ═════════ 1.5. Размеры и отступы ════════════════════════ */
+:root {
+    /* ────────────── Контейнеры ─────────────────────────── */
+    --container-sm: 540px;
+    --container-md: 720px;
+    --container-lg: 960px;
+    --container-xl: 1140px;
+    --container-xxl: 1320px;
+    --container-fluid: 100%;
+    /* ────────────── Отступы ────────────────────────────── */
+    --spacing-0: 0;
+    --spacing-px: 1px;
+    --spacing-0_5: 2px;
+    --spacing-1: 4px;
+    --spacing-1_5: 6px;
+    --spacing-2: 8px;
+    --spacing-2_5: 10px;
+    --spacing-3: 12px;
+    --spacing-3_5: 14px;
+    --spacing-4: 16px;
+    --spacing-5: 20px;
+    --spacing-6: 24px; 
+    --spacing-7: 28px; 
+    --spacing-8: 32px; 
+    --spacing-9: 36px; 
+    --spacing-10: 40px;
+    --spacing-11: 44px; 
+    --spacing-12: 48px; 
+    --spacing-14: 56px; 
+    --spacing-16: 64px; 
+    --spacing-20: 80px; 
+    --spacing-24: 96px; 
+    --spacing-28: 112px; 
+    --spacing-32: 128px; 
+    --spacing-36: 144px; 
+    --spacing-40: 160px; 
+    --spacing-44: 176px; 
+    --spacing-48: 192px; 
+    --spacing-52: 208px; 
+    --spacing-56: 224px; 
+    --spacing-60: 240px; 
+    --spacing-64: 256px; 
+    --spacing-72: 288px; 
+    --spacing-80: 320px; 
+    --spacing-96: 384px;
+    /* ────────────── Алиасы для обратной совместимости ──── */
+    --spacing-xs: var(--spacing-2);
+    --spacing-sm: var(--spacing-4);
+    --spacing-md: var(--spacing-6);
+    --spacing-lg: var(--spacing-8);
+    --spacing-xl: var(--spacing-12);
+    --spacing-xxl: var(--spacing-16);
+}
+
+/* ═════════ 1.6. Границы и скругления ═════════════════════ */
+:root {
+    /* ────────────── Границы ────────────────────────────── */
+    --color-border-primary: var(--color-gray-300);
+    --color-border-secondary: var(--color-gray-400);
+    --color-border-accent: var(--color-pink-500);
+    --color-border-focus: var(--color-blue-500);
+    --color-border-error: var(--color-red-500);
+    /* ────────────── Радиус границ ──────────────────────── */
+    --border-radius: var(--radius-md);
+    --border-radius-card: var(--radius-lg);
+    --border-radius-button: var(--radius-md);
+    /* ────────────── Скругления ─────────────────────────── */
+    --radius-none: 0;
+    --radius-sm: 4px; 
+    --radius-md: 6px; 
+    --radius-lg: 8px; 
+    --radius-xl: 12px; 
+    --radius-2xl: 16px; 
+    --radius-3xl: 24px; 
+    --radius-full: 9999px;
+}
+
+/* ═════════ 1.7. Анимации и переходы ══════════════════════ */
+:root {
+    --transition: all 0.3s ease-in-out;
+    --transition-none: none;
+    --transition-base: all 0.3s ease;
+    --transition-all: all 0.15s ease-in-out;
+    --transition-colors: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    --transition-opacity: opacity 0.15s ease-in-out;
+    --transition-transform: transform 0.15s ease-in-out;
+    --transition-fast: 150ms ease;
+    --transition-normal: 300ms ease;
+    --transition-slow: 500ms ease;
+    --animation-duration-fast: 150ms;
+    --animation-duration-normal: 300ms;
+    --animation-duration-slow: 500ms;
+}
+
+/* ═════════ 1.8. Прочее ═══════════════════════════════════ */
+:root {
+    /* ────────────── Тени ───────────────────────────────── */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+    --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+    --shadow: var(--shadow-sm);
+    --shadow-dark: var(--shadow-md);
+    --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.5);
+    /* ────────────── Размеры компонентов ────────────────── */
+    --header-height: 64px;
+    --header-height-min: 56px;
+    --header-sticky-height: 56px;
+    --sidebar-width: 256px;
+    --sidebar-collapsed-width: 64px;
+    --max-content-width: 1440px;
+    --min-content-width: 320px;
+    /* ────────────── Эффекты ────────────────────────────── */
+    --backdrop-blur: blur(8px);
+    --backdrop-brightness: brightness(0.8);
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                2. ДОПОЛНИТЕЛЬНЫЕ ТЕМЫ                   ║
+  ╚═════════════════════════════════════════════════════════╝*/
+
+/* ═════════ 2.1. Темная тема ══════════════════════════════ */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* ────────────── Цвета фона ─────────────────────── */
+        --color-bg-primary: var(--color-gray-900);
+        --color-bg-secondary: var(--color-gray-800);
+        --color-bg-tertiary: var(--color-gray-700);
+        --color-bg-overlay: rgba(0, 0, 0, 0.7);
+        --color-bg-backdrop: rgba(255, 255, 255, 0.1);
+        /* ────────────── Цвета текста ───────────────────── */
+        --color-text-primary: var(--color-gray-100);
+        --color-text-secondary: var(--color-gray-300);
+        --color-text-tertiary: var(--color-gray-400);
+        --color-text-muted: var(--color-gray-500);
+        --color-text-inverse: var(--color-gray-900);
+        /* ────────────── Цвета границ ───────────────────── */
+        --color-border-primary: var(--color-gray-700);
+        --color-border-secondary: var(--color-gray-600);
+        --color-border-focus: var(--color-blue-400);
+        /* ────────────── Кнопки ─────────────────────────── */
+        --color-button-secondary-hover: var(--color-gray-700);
+        --color-button-secondary-active: var(--color-gray-600);
+        --color-button-secondary-text: var(--color-gray-200);
+        /* ────────────── Статусные фоны ─────────────────── */
+        --color-status-success-bg: rgba(20, 83, 45, 0.2);
+        --color-status-warning-bg: rgba(113, 63, 18, 0.2);
+        --color-status-error-bg: rgba(127, 29, 29, 0.2);
+        --color-status-info-bg: rgba(30, 58, 138, 0.2);
+        /* ────────────── Тени ───────────────────────────── */
+        --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.3);
+        --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* ═════════ 2.2 Тема высокой контрастности ════════════════ */
+@media (prefers-contrast: high) {
+    :root {
+        --color-border-primary: var(--color-gray-800);
+        --color-border-secondary: var(--color-gray-900);
+        --color-text-secondary: var(--color-gray-800);
+        --color-text-muted: var(--color-gray-700);
+        --shadow-sm: 0 0 0 1px var(--color-gray-800);
+        --shadow-md: 0 0 0 2px var(--color-gray-800);
+        --shadow-focus: 0 0 0 3px var(--color-blue-700);
+    }
+}
+
+/* ═════════ 2.3. Уменьшенное движение (Reduced motion) ════ */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition-all: none;
+        --transition-colors: none;
+        --transition-opacity: none;
+        --transition-transform: none;
+        --animation-duration-fast: 0ms;
+        --animation-duration-normal: 0ms;
+        --animation-duration-slow: 0ms;
+    }
+}

@@ -1,0 +1,116 @@
+﻿@model EnglishLearningPlatform.Models.Word
+
+@{
+    ViewData["Title"] = "Карточка слова";
+}
+
+<!-- Хлебные крошки -->
+<div class="breadcrumb mb-4">
+    <a asp-action="Index" class="text-violet">Словарь</a>
+    <span class="mx-2">/</span>
+    <span class="text-muted">@Model.EnglishWord</span>
+</div>
+
+<!-- Основная часть -->
+<div class="word-detail-container">
+    <div class="row">
+        <!-- Левая колонка с изображением -->
+        <div class="col-lg-5 col-md-6">
+            <div class="text-center">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl)) {
+                    <img src="@Model.ImageUrl" class="word-detail-image" alt="@Model.EnglishWord"
+                         onerror="this.src='https://placehold.co/400x300/726ae3/white?text=Image+Not+Found'">
+                }
+                else {
+                    <img src="https://placehold.co/400x300/726ae3/white?text=Image+Not+Found"
+                         class="word-detail-image" alt="@Model.EnglishWord">
+                }
+
+                <!-- Статус перевода -->
+                @if (Model.NeedsTranslation) {
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> Это слово ожидает перевода
+                    </div>
+                }
+                <!-- Статус изучения -->
+                <div class="mt-3">
+                    <span class="word-status @(Model.IsLearned ? "status-learned" : "status-not-learned")">
+                        <i class="bi @(Model.IsLearned ? "bi-check-circle-fill" : "bi-clock") me-1"></i>
+                        @(Model.IsLearned ? "Изучено" : "Не изучено")
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка с информацией -->
+        <div class="col-lg-7 col-md-6">
+            <div class="word-info">
+                <!-- Заголовок и транскрипция -->
+                <div class="mb-4">
+                    <h1 class="word-title display-5 fw-bold text-dark mb-2">@Model.EnglishWord</h1>
+                    @if (!string.IsNullOrEmpty(Model.Transcription)) {
+                        <div class="transcription text-muted fs-5 mb-3">
+                            <i class="bi bi-mic-fill text-violet me-2"></i>
+                            [@Model.Transcription]
+                        </div>
+                    }
+                    <h2 class="translation text-violet fs-3 fw-semibold">@Model.Translation</h2>
+                </div>
+
+                <!-- Дополнительная информация -->
+                <div class="word-details mb-4">
+                    @if (!string.IsNullOrEmpty(Model.PartOfSpeech)) {
+                        <div class="detail-item mb-2">
+                            <span class="fw-semibold text-dark">Часть речи:</span>
+                            <span class="ms-2 text-muted">@Model.PartOfSpeech</span>
+                        </div>
+                    }
+
+                    @if (Model.DifficultyLevel > 0) {
+                        <div class="detail-item mb-2">
+                            <span class="fw-semibold text-dark">Сложность:</span>
+                            <span class="ms-2">
+                                @for (int i = 1; i <= 5; i++) {
+                                    <span class="star @(i <= Model.DifficultyLevel ? "active" : "")">
+                                        @(i <= Model.DifficultyLevel ? "★" : "☆")
+                                    </span>
+                                }
+                            </span>
+                        </div>
+                    }
+
+                    <div class="detail-item mb-2">
+                        <span class="fw-semibold text-dark">Добавлено:</span>
+                        <span class="ms-2 text-muted">@Model.CreatedDate.ToString("dd.MM.yyyy")</span>
+                    </div>
+                </div>
+
+                <!-- Пример использования -->
+                @if (!string.IsNullOrEmpty(Model.Example)) {
+                    <div class="example-card bg-light p-4 rounded-3 mb-4">
+                        <h5 class="text-dark mb-3">
+                            <i class="bi bi-chat-quote-fill text-violet me-2"></i>
+                            Пример использования:
+                        </h5>
+                        <p class="example-text fs-5 text-dark mb-0">
+                            "@Model.Example"
+                        </p>
+                    </div>
+                }
+
+                <!-- Кнопки действий -->
+                <div class="word-actions d-flex gap-3 flex-wrap">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-lg">
+                        <i class="bi bi-pencil-fill me-2"></i>Редактировать
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-lg">
+                        <i class="bi bi-trash-fill me-2"></i>Удалить
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>Назад к словарю
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

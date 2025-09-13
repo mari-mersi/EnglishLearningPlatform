@@ -1,0 +1,200 @@
+﻿/*=============================================================
+    Подвал сайта - Футер и нижняя навигация
+===============================================================
+***************************************************************
+Содержание:
+  1. Структура футера
+    1.1 Pre-footer (верхняя часть)
+    1.2 Основной футер
+    1.3 Нижняя панель 
+  2. Компоненты футера
+    2.1 Колонки футера
+    2.2 Навигационные ссылки и контактная информация
+    2.3 Социальные иконки
+    2.4 Кнопка наверх 
+  3. Утилиты
+    3.1 Вспомогательные классы
+    3.2 Анимации
+      3.2.1 Ховер-эффекты и активное состояние
+      3.2.2 Фокус-состояния и доступность  
+  4. Адаптивность
+    4.1 Респонсивная сетка
+    4.2 Медиа-запросы
+**************************************************************/
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  1. СТРУКТУРА ФУТЕРА                    ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ════════════ 1.1. Pre-footer (верхняя часть) ════════════ */
+.pre-footer {
+    background-color: var(--color-gray-300);
+    height: 60px;
+    padding: 15px 0px;
+}     
+/* ════════════ 1.2. Основной футер ════════════════════════ */
+footer {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin-top: 130px;
+    background-image: none; /* Ленивая загрузка */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease 0.3s;
+    position: relative;
+    z-index: var(--z-index-footer);
+}
+    footer.visible {
+        background-image: url(../images/footer-bg.jpg);
+        opacity: 1;
+        transform: translateY(0);
+        transition: all 1s ease 0.3s;
+    }
+/* ════════════ 1.3. Нижняя панель ═════════════════════════ */
+    footer p {
+        text-align: center;
+        margin: 20px 0px;
+        color: var(--color-gray-50);
+    }
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  2. КОМПОНЕНТЫ ФУТЕРА                   ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ════════════ 2.1. Колонки футера ════════════════════════ */
+.pre-footer ul li {
+    display: inline-block;
+}
+.pre-footer ul.info li {
+    margin-right: 45px;
+}
+/* ════════════ 2.2. Навигационные ссылки и 
+                     контактная информация ═════════════════ */
+    .pre-footer ul.info li a {
+        color: var(--color-gray-500);
+        font-size: 14px;
+        transition: all .3s;
+    }
+footer p a {
+    color: var(--color-gray-50);
+    transition: all .5s;
+}
+/* ════════════ 2.3. Социальные иконки ═════════════════════ */
+.pre-footer ul.social-media {
+    text-align: right;
+}
+    .pre-footer ul.social-media li {
+        margin-left: 5px;
+    }
+        .pre-footer ul.social-media li a {
+            background-color: var(--color-gray-500);
+            color: var(--color-gray-50);
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 14px;
+            transition: all .3s;
+            will-change: transform, background-color;
+        }
+.pre-footer ul.info li a i {
+    font-size: 18px;
+    margin-right: 8px;
+}
+/* ════════════ 2.4. Кнопка наверх ═════════════════════════ */
+.scroll-to-top {
+    bottom: 30px;
+    right: 30px;
+    position: fixed;
+    z-index: var(--z-index-scroll);
+}
+    .scroll-to-top a {
+        width: 50px;
+        height: 50px;
+        background: var(--color-violet-500);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  3. УТИЛИТЫ                             ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ════════════ 3.1. Вспомогательные классы ════════════════ */
+/* ════════════ 3.2. Анимации ══════════════════════════════ */
+/* ────────────────── 3.2.1 Ховер-эффекты и активное состояние ────────────────────────────────────────────────────────── */
+.pre-footer ul.info li a:hover {
+    color: var(--color-pink-500);
+}
+.pre-footer ul.social-media li a:hover {
+    background-color: var(--color-pink-500);
+}
+footer p a:hover {
+    color: var(--color-orange-500) !important;
+    text-decoration: underline;
+}
+.scroll-to-top a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(162, 64, 225, 0.3);
+}
+/* ────────────────── 3.2.2 Фокус-состояния и доступность ── */
+.pre-footer ul.info li a:focus,
+.pre-footer ul.social-media li a:focus,
+.scroll-to-top a:focus {
+    outline: 2px solid var(--color-pink-500);
+    outline-offset: 2px;
+}
+
+/*╔═════════════════════════════════════════════════════════╗
+  ║                  4. АДАПТИВНОСТЬ                        ║
+  ╚═════════════════════════════════════════════════════════╝*/
+/* ════════════ 4.1. Респонсивная сетка ════════════════════ */
+/* ════════════ 4.2. Медиа-запросы ═════════════════════════ */
+@media (max-width: 480px) {
+    .pre-footer ul, .pre-footer ul.info {
+        padding: 0px;
+    }
+        .pre-footer ul.info li {
+            margin-right: 10px;
+        }
+        .pre-footer ul.info li a i {
+            font-size: 16px;
+        }
+        .pre-footer ul.social-media li {
+            margin-left: 1px;
+        }
+    .pre-footer ul.social-media li a {
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+        font-size: 12px;
+    }
+}
+@media (max-width: 768px) {
+    .pre-footer ul {
+        padding: 0px;
+    }
+    .pre-footer ul.info li {
+        margin-right: 15px;
+    }
+}
+@media (max-width: 992px) {
+    .pre-footer ul.info li a {
+        font-size: 0;
+        padding: 8px;
+    }
+
+        .pre-footer ul.info li a i {
+            font-size: 18px;
+            margin-right: 0;
+        }
+
+    .pre-footer ul.info li {
+        margin-right: 15px;
+    }
+}

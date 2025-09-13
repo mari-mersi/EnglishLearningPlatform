@@ -1,0 +1,322 @@
+﻿@using EnglishLearningPlatform.Models
+@model IEnumerable<EnglishLearningPlatform.Models.Word>
+
+@{
+	ViewData["Title"] = "Словарь";
+	ViewData["CurrentPage"] = "words";
+}
+
+<!-- Хлебные крошки и заголовок -->
+<section class="intro-banner">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-12">
+				<h1>Мой словарь <em class="text-violet">Английского</em></h1>
+				<h4>Здесь собраны все слова, которые вы изучаете</h4>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- ОБЕРТКА ДЛЯ ОСНОВНОГО КОНТЕНТА -->
+<div class="main-content-wrapper" style="position: relative; z-index: 10;">
+	<!-- Сообщения -->
+	@if (TempData["Message"] != null) {
+		<div class="alert alert-info alert-dismissible fade show" role="alert">
+			<i class="bi bi-info-circle"></i> @TempData["Message"]
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	}
+
+
+	<!-- Основной контент -->
+	<section class="page-section">
+		<div class="container">
+			<!-- Панель управления -->
+			<div class="row mobile-bottom-fix-big">
+				<div class="col-lg-12">
+					<div class="d-flex justify-content-between align-items-center mb-5">
+						<div class="section-heading">
+							<h6>Ваша коллекция</h6>
+							<h4>Все <em>слова</em></h4>
+							<div class="line-dec"></div>
+						</div>
+						<a asp-action="Create" class="btn btn-primary" style="
+								background-color: #FFA794;
+								color: white;
+								padding: 12px 30px;
+								border-radius: 23px;
+								border: none;
+								font-weight: 500;
+								transition: all 0.3s;">
+							<i class="bi bi-plus-circle"></i> Добавить слово
+						</a>
+						<a asp-action="CreateWordsList" class="btn btn-primary" style="
+							background-color: #FFA794;
+							color: white;
+							padding: 12px 30px;
+							border-radius: 23px;
+							border: none;
+							font-weight: 500;
+							transition: all 0.3s;">
+							<i class="bi bi-list-check"></i> Добавить список слов
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<!-- Фильтры -->
+			<div class="row mb-4">
+				<div class="col-md-6">
+					<input type="text" id="searchInput" class="form-control" placeholder="Поиск слов..." onkeyup="filterWords()">
+				</div>
+				<div class="col-md-3">
+					<select class="form-select" onchange="filterByStatus()">
+						<option value="all">Все слова</option>
+						<option value="learned">Выученные</option>
+						<option value="new">Для изучения</option>
+						<option value="needsTranslation">Ожидают перевода</option>
+						<option value="hasTranslation">С переводом</option>
+					</select>
+				</div>
+				<div class="col-md-3">
+					<select class="form-select" onchange="sortWords()">
+						<option value="newest" selected>Сначала новые</option>
+						<option value="oldest">Сначала старые</option>
+						<option value="alphabetical">По алфавиту</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- Сетка слов -->
+			<div class="words-grid-container">
+				@if (!Model.Any()) {
+					<div class="empty-state">
+						<div class="text-center py-5">
+							<i class="bi bi-journal-x" style="font-size: 4rem; color: #6c757d;"></i>
+							<h3 class="mt-3">Словарь пуст</h3>
+							<p class="text-muted">Добавьте свои первые слова для изучения</p>
+							<a asp-action="Create" class="btn btn-primary" style="
+	                    background-color: #F790C4;
+	                    color: white;
+	                    padding: 12px 30px;
+	                    border-radius: 23px;
+	                    border: none;
+	                    font-weight: 500;
+	                    margin-top: 20px;">
+								<i class="bi bi-plus-circle"></i> Добавить первое слово
+							</a>
+						</div>
+					</div>
+				}
+				else {
+					@foreach (var item in Model) {
+						<div class="word-card-item"
+							 data-date="@item.CreatedDate.ToString("yyyy-MM-dd")"
+							 data-word="@item.EnglishWord.ToLower()"
+							 data-is-learned="@item.IsLearned"
+							 data-needs-translation="@item.NeedsTranslation">
+							<div class="word-card">
+								<div class="thumb">
+									@if (!string.IsNullOrEmpty(item.ImageUrl)) {
+										<img src="@item.ImageUrl" alt="@item.EnglishWord"
+											 onerror="this.src='https://placehold.co/300x200/726ae3/white?text=Image+Not+Found'">
+									}
+									else {
+										<img src="https://placehold.co/300x200/726ae3/white?text=Image+Not+Found"
+											 alt="@item.EnglishWord">
+									}
+									<!-- Бейдж статуса изучения -->
+									@if (item.IsLearned) {
+										<div class="learning-status-badge status-learned" style="position: absolute; top: 10px; left: 10px; background: #28a745; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+											<i class="bi bi-check-circle"></i> Изучено
+										</div>
+									}
+									else {
+										<div class="learning-status-badge status-not-learned" style="position: absolute; top: 10px; left: 10px; background: #FF876D; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+											<i class="bi bi-clock"></i> Для изучения
+										</div>
+									}
+
+									<!-- Бейдж перевода -->
+									@if (item.NeedsTranslation) {
+										<div class="translation-badge" style="position: absolute; top: 10px; right: 10px; background: #ffc107; color: #000; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+											<i class="bi bi-translate"></i> Нужен перевод
+										</div>
+									}
+								</div>
+								<div class="right-content"
+									 data-date="@item.CreatedDate.ToString("yyyy-MM-dd")"
+									 data-is-learned="@item.IsLearned"
+									 data-needs-translation="@item.NeedsTranslation">
+
+									<h4>@item.EnglishWord</h4>
+									<p>@(string.IsNullOrEmpty(item.Translation) ? "Перевод не указан" : item.Translation)</p>
+									<div class="d-flex justify-content-center gap-2">
+										<a asp-action="Details" asp-route-id="@item.Id" class="card-button" style="background-color: #EF3996;">
+											<i class="bi bi-eye"></i> Детали
+										</a>
+										<a asp-action="Edit" asp-route-id="@item.Id" class="card-button" style="background-color: #FF5F3D;">
+											<i class="bi bi-pencil"></i> Изменить
+										</a>
+									</div>
+									<div class="text-center mt-3">
+										<a asp-action="Delete" asp-route-id="@item.Id" class="text-danger" style="font-size: 14px;">
+											<i class="bi bi-trash"></i> Удалить
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					}
+				}
+			</div>
+		</div>
+	</section>
+</div>
+
+@section Scripts {
+	<script>
+		// Инициализация при загрузке
+		document.addEventListener('DOMContentLoaded', function() {
+			const sortSelect = document.querySelector('select[onchange="sortWords()"]');
+			sortSelect.value = 'newest';
+			sortWords();
+		});
+
+		function filterByStatus() {
+			const statusFilter = document.querySelector('select[onchange="filterByStatus()"]').value;
+			const searchText = document.getElementById('searchInput').value.toLowerCase();
+			const cardContainers = document.querySelectorAll('.col-lg-4.col-md-6.col-sm-12');
+
+			cardContainers.forEach((container) => {
+				const rightContent = container.querySelector('.right-content');
+				const englishWord = container.querySelector('h4').textContent.toLowerCase();
+				const translation = container.querySelector('p').textContent.toLowerCase();
+				const isLearned = rightContent.getAttribute('data-is-learned') === 'True';
+				const needsTranslation = rightContent.getAttribute('data-needs-translation') === 'True';
+				const hasTranslation = !needsTranslation;
+
+				const searchMatch = searchText === '' ||
+								   englishWord.includes(searchText) ||
+								   translation.includes(searchText);
+
+				let statusMatch = true;
+				switch(statusFilter) {
+					case 'learned':
+						statusMatch = isLearned;
+						break;
+					case 'new':
+						statusMatch = !isLearned;
+						break;
+					case 'needsTranslation':
+						statusMatch = needsTranslation;
+						break;
+					case 'hasTranslation':
+						statusMatch = hasTranslation;
+						break;
+					default: // 'all' - все слова
+						statusMatch = true;
+				}
+
+				container.style.display = (searchMatch && statusMatch) ? 'block' : 'none';
+			});
+			applyFilters();
+		}
+
+		function filterWords() {
+			const searchText = document.getElementById('searchInput').value.toLowerCase();
+			const statusFilter = document.querySelector('select[onchange="filterByStatus()"]').value;
+			const cardContainers = document.querySelectorAll('.col-lg-4.col-md-6.col-sm-12');
+
+			cardContainers.forEach((container) => {
+				const rightContent = container.querySelector('.right-content');
+				const englishWord = container.querySelector('h4').textContent.toLowerCase();
+				const translation = container.querySelector('p').textContent.toLowerCase();
+				const isLearned = rightContent.getAttribute('data-is-learned') === 'True';
+				const needsTranslation = rightContent.getAttribute('data-needs-translation') === 'True';
+				const hasTranslation = !needsTranslation;
+
+				const searchMatch = searchText === '' ||
+								   englishWord.includes(searchText) ||
+								   translation.includes(searchText);
+
+				let statusMatch = true;
+				switch(statusFilter) {
+					case 'learned':
+						statusMatch = isLearned;
+						break;
+					case 'new':
+						statusMatch = !isLearned;
+						break;
+					case 'needsTranslation':
+						statusMatch = needsTranslation;
+						break;
+					case 'hasTranslation':
+						statusMatch = hasTranslation;
+						break;
+				}
+
+				container.style.display = (searchMatch && statusMatch) ? 'block' : 'none';
+			});
+			applyFilters();
+		}
+
+		function sortWords() {
+			const sortOption = document.querySelector('select[onchange="sortWords()"]').value;
+			const container = document.querySelector('.words-grid-container');
+			const cardItems = Array.from(document.querySelectorAll('.word-card-item'));
+
+			cardItems.sort((a, b) => {
+				const wordA = a.querySelector('h4').textContent;
+				const wordB = b.querySelector('h4').textContent;
+				const dateA = a.getAttribute('data-date');
+				const dateB = b.getAttribute('data-date');
+
+				switch(sortOption) {
+					case 'newest': return dateB.localeCompare(dateA);
+					case 'oldest': return dateA.localeCompare(dateB);
+					case 'alphabetical': return wordA.localeCompare(wordB);
+					default: return 0;
+				}
+			});
+
+			// Очищаем и переставляем элементы
+			container.innerHTML = '';
+			cardItems.forEach(item => container.appendChild(item));
+
+			// Применяем фильтры после сортировки
+			applyFilters();
+		}
+
+		function applyFilters() {
+			const searchText = document.getElementById('searchInput').value.toLowerCase();
+			const statusFilter = document.querySelector('select[onchange="filterByStatus()"]').value;
+			const cardItems = document.querySelectorAll('.word-card-item');
+
+			cardItems.forEach(item => {
+				const word = item.getAttribute('data-word');
+				const translation = item.querySelector('p').textContent.toLowerCase();
+				const isLearned = item.getAttribute('data-is-learned') === 'True';
+				const needsTranslation = item.getAttribute('data-needs-translation') === 'True';
+				const hasTranslation = !needsTranslation;
+
+				const searchMatch = searchText === '' ||
+								   word.includes(searchText) ||
+								   translation.includes(searchText);
+
+				let statusMatch = true;
+				switch(statusFilter) {
+					case 'learned': statusMatch = isLearned; break;
+					case 'new': statusMatch = !isLearned; break;
+					case 'needsTranslation': statusMatch = needsTranslation; break;
+					case 'hasTranslation': statusMatch = hasTranslation; break;
+					default: statusMatch = true;
+				}
+
+				item.style.display = (searchMatch && statusMatch) ? 'block' : 'none';
+			});
+		}
+
+	</script>
+}

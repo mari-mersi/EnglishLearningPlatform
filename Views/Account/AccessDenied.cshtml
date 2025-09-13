@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Доступ запрещен";
+}
+
+<div class="intro-banner">
+    <div class="container">
+        <h1>Доступ запрещен</h1>
+        <p>У вас нет прав для доступа к этой странице</p>
+    </div>
+</div>
+
+<div class="page-section">
+    <div class="container text-center">
+        <div class="alert alert-warning">
+            <h4>Недостаточно прав</h4>
+            <p>Для доступа к этой странице требуются дополнительные права.</p>
+        </div>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Вернуться на главную</a>
+    </div>
+</div>

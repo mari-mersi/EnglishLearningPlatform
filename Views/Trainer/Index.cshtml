@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "Тренажер";
+}
+
+<h1>Тренажер слов</h1>
+
+@if (ViewBag.Message != null) {
+    <div class="alert alert-info">
+        @ViewBag.Message
+    </div>
+    <a asp-action="Index" asp-controller="Dictionary" class="btn btn-primary">Перейти к словарю</a>
+}
+else {
+    <div class="card">
+        <div class="card-body text-center">
+            <h3 class="card-title">Как переводится слово:</h3>
+            <h2 class="text-primary mb-4">@ViewBag.WordToLearn.EnglishWord</h2>
+
+            <form id="trainerForm">
+                <input type="hidden" id="wordId" value="@ViewBag.WordToLearn.Id" />
+
+                <div class="form-group">
+                    <input type="text" class="form-control form-control-lg"
+                           id="userAnswer" placeholder="Введите перевод..." required>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-lg">Проверить</button>
+            </form>
+
+            <div id="result" class="mt-3" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Следующее слово</a>
+        <a asp-action="Index" asp-controller="Dictionary" class="btn btn-primary">Вернуться к словарю</a>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#trainerForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var wordId = $('#wordId').val();
+                var userAnswer = $('#userAnswer').val();
+
+                $.post('@Url.Action("CheckAnswer", "Trainer")', {
+                    wordId: wordId,
+                    userAnswer: userAnswer
+                }, function(data) {
+                    if (data.isCorrect) {
+                        $('#result').html('<div class="alert alert-success">Правильно! Слово отмечено как изученное.</div>');
+                    } else {
+                        $('#result').html('<div class="alert alert-danger">Неправильно. Правильный ответ: ' + data.correctAnswer + '</div>');
+                    }
+                    $('#result').show();
+                    $('#userAnswer').prop('disabled', true);
+                    $('button[type="submit"]').prop('disabled', true);
+                });
+            });
+        });
+    </script>
+}

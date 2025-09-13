@@ -1,0 +1,90 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+@{
+    var pageTitle = ViewData["Title"] ?? "EnglishLearningPlatform";
+    var user = await UserManager.GetUserAsync(User);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+        <title>@pageTitle - EnglishLearningPlatform</title>
+
+        <!-- Microdata Schema.org -->
+        <script type="application/ld+json">
+            @Html.Raw(@"{
+                ""@context"": ""https://schema.org"",
+                ""@type"": ""WebSite"",
+                ""name"": ""Мария Плескань"",
+                ""jobTitle"": ""Fullstack веб-разработчик"",
+                ""email"": ""mailto:mpleskan2002@gmail.com"",
+                ""telephone"": ""+79149196570"",
+                ""url"": ""https://github.com/mari-mersi"",
+                ""sameAs"": [
+                    ""https://vk.com/marimersi"",
+                    ""https://t.me/mari_mersi"",
+                    ""https://github.com/mari-mersi""
+                ]
+            }")
+        </script>
+
+        <!-- Bootstrap core CSS -->
+        <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Добавленные CSS файлы -->
+        <link rel="stylesheet" href="~/css/fontawesome.css">
+        <link rel="stylesheet" href="~/css/animated.css">
+        <link rel="stylesheet" href="~/css/owl.css">
+        <link rel="stylesheet" href="~/css/base/normalize.css">
+        
+        <!-- Основные CSS файлы -->
+        <link rel="stylesheet" href="~/css/variables.css">
+        <link rel="stylesheet" href="~/css/style.css">
+        <link rel="stylesheet" href="~/css/header.css?@DateTime.Now.Ticks">
+        <link rel="stylesheet" href="~/css/footer.css">
+        <link rel="stylesheet" href="~/css/home.css">
+        <link rel="stylesheet" href="~/css/dictionary.css?@DateTime.Now.Ticks">
+        <link rel="stylesheet" href="~/css/trainer.css">
+    
+        @RenderSection("Styles", required: false)
+    </head>
+
+    <body>
+        <!-- ***** Экран загрузки ***** -->
+        <div id="js-preloader" class="js-preloader">
+            <div class="preloader-inner">
+                <span class="dot"></span>
+                <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        <!-- ***** Конец экрана загрузки ***** -->
+    
+        <partial name="_Header" />
+        @RenderBody()
+        <partial name="_Footer" />
+
+        <!-- Scripts -->
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/owl-carousel.js"></script>
+        <script src="~/js/animation.js"></script>
+        <script src="~/js/imagesloaded.js"></script>
+        <script src="~/js/custom.js"></script>
+
+        @RenderSection("Scripts", required: false)
+    </body>
+</html>

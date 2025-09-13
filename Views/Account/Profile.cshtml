@@ -1,0 +1,119 @@
+﻿@model EnglishLearningPlatform.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Профиль пользователя";
+}
+
+<div class="intro-banner">
+    <div class="container">
+        <h1>Профиль пользователя</h1>
+        <p>Управление вашей учетной записью</p>
+    </div>
+</div>
+
+<div class="page-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <div class="profile-avatar mb-4">
+                                    <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
+                                         style="width: 100px; height: 100px; border-radius: 50%; font-size: 2.5rem;">
+                                        @Model.FirstName?[0]@Model.LastName?[0]
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h4 class="mb-4">Информация о пользователе</h4>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-4">
+                                        <strong>@Html.DisplayNameFor(model => model.FirstName):</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        @Model.FirstName
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-4">
+                                        <strong>@Html.DisplayNameFor(model => model.LastName):</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        @Model.LastName
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-4">
+                                        <strong>@Html.DisplayNameFor(model => model.Email):</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        @Model.Email
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-4">
+                                        <strong>@Html.DisplayNameFor(model => model.UserName):</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        @Model.UserName
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-4">
+                                        <strong>@Html.DisplayNameFor(model => model.CreatedAt):</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-sm-4">
+                                        <strong>@Html.DisplayNameFor(model => model.Roles):</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <span class="badge bg-primary">@Model.Roles</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                                        <i class="fas fa-home"></i> На главную
+                                    </a>
+                                    <form asp-action="Logout" method="post">
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fas fa-sign-out-alt"></i> Выйти
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .profile-avatar {
+            margin-bottom: 2rem;
+        }
+        .avatar-circle {
+            background: linear-gradient(45deg, var(--color-violet-500), var(--color-pink-500));
+            font-weight: 600;
+        }
+        .badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+    </style>
+}
